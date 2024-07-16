@@ -1,8 +1,11 @@
 
 import { useLoaderData } from "@remix-run/react";
 import { authenticate } from "../shopify.server";
-import { Badge, BlockStack, Box, Text, } from "@shopify/polaris";
+import { Badge, BlockStack, Box, Button, Text, Card, InlineGrid, Grid } from "@shopify/polaris";
 import styles from "../styles/welcome.module.css"
+import HelpDeskMessage from "../components/HelpDeskMessage";
+import IntroVideo from "../components/IntroVideo";
+import Footer from "../components/Footer";
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   const shop = await admin.rest.resources.Shop.all({ session });
@@ -12,33 +15,50 @@ export const loader = async ({ request }) => {
 export default function Index() {
   const { shop } = useLoaderData();
   return (
-    <div className="Polaris-Page Polaris-Page--fullWidth">
+    <div className="Polaris-Page">
+
       <BlockStack gap='400'>
         <div style={{
           width: '200px',
         }} className={styles.custom_padding}>
-          <Box padding="400" width="286px" background="bg">
+          <Box padding="400" width="586px" background="bg">
             <Text variant="headingMd" as="h3" fontWeight="bold">Hi {shop.data[0].shop_owner}!</Text>
-            <Text variant="bodySm" alignment="left" as="p" >Welcome to Prerna Size Chart 👕 📏</Text>
+            <Text variant="bodySm" breakWord={false} alignment="left" as="p" >Greetings from Size Chart Pro! We're Here to Ensure You Get the Best Fit 👕 📏</Text>
 
           </Box>
         </div>
       </BlockStack>
-      <div className="Polaris-Page__Content">
-        <div className="Polaris-Layout">
-          <div className="Polaris-Layout__Section">
-            <div className="Polaris-LegacyCard">
-              <div className="Polaris-LegacyCard__Header Polaris-LegacyCard__FirstSectionPadding">
-                <h2 className="Polaris-Text--root Polaris-Text--headingSm">Enable App <Badge tone="info"> Off</Badge></h2>
-              </div>
-              <div className="Polaris-LegacyCard__Section Polaris-LegacyCard__LastSectionPadding">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt.</p>
-              </div>
-            </div>
-          </div>
+      <Grid columns={{ sm: 3 }}>
+        <Grid.Cell columnSpan={{ xs: 6, sm: 4, md: 4, lg: 11, xl: 12 }}>
+          <Card roundedAbove="sm">
+            <BlockStack gap="200">
+              <InlineGrid columns="1fr auto">
+                <Text as="h2" variant="headingSm">
+                  Enable app <Badge tone="info"> Off</Badge>
+                </Text>
+                <Button
+                  onClick={() => { }}
+                  accessibilityLabel="Enable"
+                  variant="primary"
+                >
+                  Enable
+                </Button>
+              </InlineGrid>
+              <Text as="p" variant="bodyMd">
+                Enable the app in your theme editor now to display your size chart on the storefront
+              </Text>
+            </BlockStack>
+          </Card>
+        </Grid.Cell>
+        <Grid.Cell columnSpan={{ xs: 6, sm: 4, md: 4, lg: 11, xl: 12 }}>
+          <IntroVideo />
+        </Grid.Cell>
+        <Grid.Cell columnSpan={{ xs: 6, sm: 4, md: 4, lg: 11, xl: 12 }}>
+          <HelpDeskMessage />
+        </Grid.Cell>
+      </Grid>
 
-        </div>
-      </div>
+      <Footer />
     </div>
   );
 }
