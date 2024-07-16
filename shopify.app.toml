@@ -3,7 +3,7 @@
 client_id = "faf0d7a36fc7910b0c24e38d5e234b6a"
 name = "SizeChartPro"
 handle = "sizechartpro-1"
-application_url = "https://weighted-sys-strategy-california.trycloudflare.com"
+application_url = "https://farmer-dialog-offering-verizon.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = ""
 
 [auth]
 redirect_urls = [
-  "https://weighted-sys-strategy-california.trycloudflare.com/auth/callback",
-  "https://weighted-sys-strategy-california.trycloudflare.com/auth/shopify/callback",
-  "https://weighted-sys-strategy-california.trycloudflare.com/api/auth/callback"
+  "https://farmer-dialog-offering-verizon.trycloudflare.com/auth/callback",
+  "https://farmer-dialog-offering-verizon.trycloudflare.com/auth/shopify/callback",
+  "https://farmer-dialog-offering-verizon.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
