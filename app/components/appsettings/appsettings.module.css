@@ -1,0 +1,12 @@
+.gridcontainer {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+  .setting_option_lable label {
+    display: block;
+    margin: auto;
+    margin-top: 10px;
+    width: 20px;
+  }

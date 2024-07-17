@@ -3,7 +3,6 @@ function IntroVideo({ shop_owner }) {
     return (
         <div className="Polaris-LegacyCard">
             <div className="Polaris-MediaCard">
-
                 <div className="Polaris-MediaCard__InfoContainer">
                     <div
                         className="Polaris-Box"
@@ -97,7 +96,6 @@ function IntroVideo({ shop_owner }) {
                     />
                 </div>
             </div>
-
         </div>
 
     )
