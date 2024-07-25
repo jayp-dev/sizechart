@@ -1,4 +1,4 @@
-import { BlockStack, Card, Divider, Form, FormLayout, Grid, Select, Text, TextField } from "@shopify/polaris";
+import { Banner, BlockStack, Card, Divider, Form, FormLayout, Grid, Select, Text, TextField } from "@shopify/polaris";
 import styles from "../styles/welcome.module.css";
 import React, { useCallback, useState } from "react";
 import { authenticate } from "../shopify.server";
@@ -7,8 +7,10 @@ import useDisplayNames from '../hooks/useDisplayNames';
 import GridIcons from "../components/appsettings/GridIcons";
 import AppCssInformation from "../components/appsettings/AppCssInformation";
 import SizechartColors from "../components/appsettings/SizechartColors";
+import Footer from "../components/Footer";
+import Sizechartborder from "../components/appsettings/Sizechartborder";
+import SizePlacement from "../components/appsettings/SizePlacement";
 
-// import SettingsStyles from "../components/appsettings/appsettings.module.css"
 export const loader = async ({ request }) => {
     const { admin } = await authenticate.admin(request);
     const response = await admin.graphql(`
@@ -33,13 +35,11 @@ export default function Settings() {
         (newValue) => setValue(newValue),
         [],
     );
-
     const localesArray = data?.data?.shopLocales?.map(item => item.locale) || [];
     const options = localesArray.map(locale => ({
         label: displayNames ? displayNames.of(locale) : 'Loading...',
         value: locale
     }));
-
     const handleSelectChange = useCallback((value) => setSelected(value), []);
 
     return (
@@ -52,6 +52,15 @@ export default function Settings() {
                 </ui-title-bar>
                 <Grid columns={{ sm: 3 }}>
                     <Grid.Cell columnSpan={{ xs: 6, sm: 4, md: 4, lg: 11, xl: 12 }}>
+                        <div style={{ marginBlock: '18px' }}>
+                            <Banner title="Embed SizePro in your theme"
+                                action={{ content: 'Embed App', url: '' }}
+                                secondaryAction={{ content: 'Learn more' }}
+                                tone="warning"
+                                onDismiss={() => { }}>
+                                <p>Make sure you know how these changes affect your store.</p>
+                            </Banner>
+                        </div>
                         <Card roundedAbove="sm">
                             <FormLayout>
                                 <BlockStack gap="500">
@@ -114,11 +123,14 @@ export default function Settings() {
                             <GridIcons />
                         </Card>
                     </Grid.Cell>
+                    <SizePlacement />
                     <AppCssInformation />
                     <SizechartColors ></SizechartColors>
+                    <Sizechartborder />
+
                 </Grid>
             </Form>
-
+            <Footer />
         </div>
     );
 }
