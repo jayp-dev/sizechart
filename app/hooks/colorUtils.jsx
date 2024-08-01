@@ -1,4 +1,3 @@
-// colorUtils.js
 
 export const hslToRgb = (h, s, l) => {
     s /= 100;

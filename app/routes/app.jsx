@@ -9,14 +9,13 @@ import { authenticate } from "../shopify.server";
 export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
 export const loader = async ({ request }) => {
-  await authenticate.admin(request);
 
-  return json({ apiKey: process.env.SHOPIFY_API_KEY || "" });
+  const { session } = await authenticate.admin(request);
+  return json({ apiKey: process.env.SHOPIFY_API_KEY || "", session });
 };
 
 export default function App() {
-  const { apiKey } = useLoaderData();
-
+  const { apiKey, session } = useLoaderData();
   return (
     <AppProvider isEmbeddedApp apiKey={apiKey}>
       <NavMenu>
@@ -25,7 +24,9 @@ export default function App() {
         </Link>
         <Link to="/app/templates">Templates</Link>
         <Link to="/app/settings">Settings</Link>
-        <Link to="/app/additional">Additional page</Link>
+        {session.shop === 'gifting4.myshopify.com' && (
+          <Link to="/app/createcategory">Create Category</Link>
+        )}
       </NavMenu>
       <Outlet />
     </AppProvider>

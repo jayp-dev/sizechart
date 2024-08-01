@@ -3,7 +3,7 @@
 client_id = "faf0d7a36fc7910b0c24e38d5e234b6a"
 name = "SizeChartPro"
 handle = "sizechartpro-1"
-application_url = "https://jesse-convertible-hunter-governmental.trycloudflare.com"
+application_url = "https://platinum-salem-builders-homes.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_locales,read_products"
 
 [auth]
 redirect_urls = [
-  "https://jesse-convertible-hunter-governmental.trycloudflare.com/auth/callback",
-  "https://jesse-convertible-hunter-governmental.trycloudflare.com/auth/shopify/callback",
-  "https://jesse-convertible-hunter-governmental.trycloudflare.com/api/auth/callback"
+  "https://platinum-salem-builders-homes.trycloudflare.com/auth/callback",
+  "https://platinum-salem-builders-homes.trycloudflare.com/auth/shopify/callback",
+  "https://platinum-salem-builders-homes.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
