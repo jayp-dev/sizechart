@@ -25,7 +25,10 @@ export default function App() {
         <Link to="/app/templates">Templates</Link>
         <Link to="/app/settings">Settings</Link>
         {session.shop === 'gifting4.myshopify.com' && (
-          <Link to="/app/createcategory">Create Category</Link>
+          <>
+            <Link to="/app/createcategory">Create Category</Link>
+            <Link to="/app/createsizechart/admin">Create sizechart</Link>
+          </>
         )}
       </NavMenu>
       <Outlet />

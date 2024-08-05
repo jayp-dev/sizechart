@@ -10,6 +10,7 @@ import SizechartColors from "../components/appsettings/SizechartColors";
 import Footer from "../components/Footer";
 import Sizechartborder from "../components/appsettings/Sizechartborder";
 import SizePlacement from "../components/appsettings/SizePlacement";
+import AppEmbdedBanner from "../components/AppEmbdedBanner";
 
 export const loader = async ({ request }) => {
     const { admin } = await authenticate.admin(request);
@@ -52,15 +53,7 @@ export default function Settings() {
                 </ui-title-bar>
                 <Grid columns={{ sm: 3 }}>
                     <Grid.Cell columnSpan={{ xs: 6, sm: 4, md: 4, lg: 11, xl: 12 }}>
-                        <div style={{ marginBlock: '18px' }}>
-                            <Banner title="Embed SizePro in your theme"
-                                action={{ content: 'Embed App', url: '' }}
-                                secondaryAction={{ content: 'Learn more' }}
-                                tone="warning"
-                                onDismiss={() => { }}>
-                                <p>Make sure you know how these changes affect your store.</p>
-                            </Banner>
-                        </div>
+                        <AppEmbdedBanner />
                         <Card roundedAbove="sm">
                             <FormLayout>
                                 <BlockStack gap="500">
