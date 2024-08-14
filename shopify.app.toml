@@ -3,7 +3,7 @@
 client_id = "faf0d7a36fc7910b0c24e38d5e234b6a"
 name = "SizeChartPro"
 handle = "sizechartpro-1"
-application_url = "https://cork-rhythm-connect-many.trycloudflare.com"
+application_url = "https://parameters-model-template-glasses.trycloudflare.com"
 embedded = true
 
 [build]
@@ -13,13 +13,13 @@ include_config_on_deploy = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_locales,read_products"
+scopes = "read_locales,read_products,read_themes"
 
 [auth]
 redirect_urls = [
-  "https://cork-rhythm-connect-many.trycloudflare.com/auth/callback",
-  "https://cork-rhythm-connect-many.trycloudflare.com/auth/shopify/callback",
-  "https://cork-rhythm-connect-many.trycloudflare.com/api/auth/callback"
+  "https://parameters-model-template-glasses.trycloudflare.com/auth/callback",
+  "https://parameters-model-template-glasses.trycloudflare.com/auth/shopify/callback",
+  "https://parameters-model-template-glasses.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

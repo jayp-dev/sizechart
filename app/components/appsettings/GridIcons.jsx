@@ -1,41 +1,31 @@
 import React from 'react';
-import { Card, RadioButton, BlockStack } from '@shopify/polaris';
+import { RadioButton, BlockStack, Grid, Thumbnail, Box } from '@shopify/polaris';
 import styles from '../appsettings/appsettings.module.css';
 
-function GridExample() {
+function GridExample({ icons }) {
     const [selected, setSelected] = React.useState('option1');
     const handleChange = (value) => setSelected(value);
-    const renderCard = (id) => (
-        <Card sectioned key={id} roundedAbove="sm">
-            <BlockStack align="center">
-                <span className="Polaris-Thumbnail Polaris-Thumbnail--sizeMedium" style={{
-                    background: 'var(--p-color-bg)',
-                    height: 'auto',
-                    margin: 'auto',
-                    width: '50px',
-                    borderRadius: '50%',
-                }}>
-                    <img alt="Black choker necklace" src="https://burst.shopifycdn.com/photos/black-leather-choker-necklace_373x@2x.jpg" />
-                </span>
-                <div className={styles.setting_option_lable}>
-                    <RadioButton
-                        label=""
-                        checked={selected === id}
-                        id={id}
-                        name="radioGroup"
-                        onChange={() => handleChange(id)}
-                    />
-                </div>
-            </BlockStack>
-        </Card>
-    );
-
-    const gridItems = Array.from({ length: 16 }, (_, i) => renderCard(`option${i + 1}`));
     return (
         <>
-            <div className={styles.gridcontainer}>
-                {gridItems}
-            </div >
+            <Box paddingBlockStart={200}>
+                <Grid>
+                    {icons.map((icon, index) =>
+                        <>
+                            <Grid.Cell columnSpan={{ xs: 2, sm: 3, md: 3, lg: 1, xl: 1 }}>
+                                <BlockStack inlineAlign="center" gap="400">
+                                    <Thumbnail alt={`Icon_${index}`} source={`/uploads/${icon.name}`}></Thumbnail>
+                                    <RadioButton
+                                        checked={selected === icon.id}
+                                        id={icon.id}
+                                        name="radioGroup"
+                                        onChange={() => handleChange(icon.id)}
+                                    />
+                                </BlockStack>
+                            </Grid.Cell>
+                        </>
+                    )}
+                </Grid>
+            </Box>
         </>
     );
 }

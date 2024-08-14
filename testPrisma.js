@@ -5,22 +5,38 @@ const prisma = new PrismaClient();
 async function testPrisma() {
   try {
     // Test finding categories
-    const categories = await prisma.sizeCategory.findMany();
+    const categories = await prisma.welcomeScreen.findMany();
     console.log('Categories:', categories);
 
-    // Test creating a category
-    const newCategory = await prisma.sizeCategory.create({
-      data: { name: 'Test Category' },
+    const newWelcomeScreen = await prisma.welcomeScreen.create({
+      data: {
+        EmbedApp: true,
+        GettingStart: false,
+        sessionId: 'offline_gifting4.myshopify.com', // Ensure this sessionId exists in Session table
+      },
     });
-    console.log('New Category:', newCategory);
 
-    // Optionally, you can also test updating and deleting
-    // Update a category
-    const updatedCategory = await prisma.sizeCategory.update({
-      where: { id: newCategory.id },
-      data: { name: 'Updated Category Name' },
+    console.log('newWelcomeScreen:', newWelcomeScreen);
+
+    const welcomeScreenWithSession = await prisma.welcomeScreen.findUnique({
+      where: { id: 1 },
+      include: { session: true },
     });
-    console.log('Updated Category:', updatedCategory);
+    console.log('welcomeScreenWithSession', welcomeScreenWithSession)
+
+    // Test creating a category
+    // const newCategory = await prisma.welcomeScreen.create({
+    //   data: { name: 'Test Category' },
+    // });
+    // console.log('New Category:', newCategory);
+
+    // // Optionally, you can also test updating and deleting
+    // // Update a category
+    // const updatedCategory = await prisma.sizeCategory.update({
+    //   where: { id: newCategory.id },
+    //   data: { name: 'Updated Category Name' },
+    // });
+    // console.log('Updated Category:', updatedCategory);
 
     // // Delete a category
     // const deletedCategory = await prisma.sizeCategory.delete({

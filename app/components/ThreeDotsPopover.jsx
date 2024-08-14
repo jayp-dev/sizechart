@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Popover, ActionList } from '@shopify/polaris';
 
-function ThreeDotsPopover() {
+function ThreeDotsPopover({ updateGetstart }) {
     const [popoverActive, setPopoverActive] = useState(false);
 
     const togglePopoverActive = useCallback(
@@ -50,7 +50,7 @@ function ThreeDotsPopover() {
                     {
                         content: 'Dismiss',
                         onAction: () => {
-                            console.log('Dismiss clicked');
+                            updateGetstart(false)
                             setPopoverActive(false);
                         },
                     },

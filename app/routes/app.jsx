@@ -28,6 +28,7 @@ export default function App() {
           <>
             <Link to="/app/createcategory">Create Category</Link>
             <Link to="/app/createsizechart/admin">Create sizechart</Link>
+            <Link to="/app/icons/admin">Create Icons</Link>
           </>
         )}
       </NavMenu>

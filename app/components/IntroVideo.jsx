@@ -1,5 +1,5 @@
 import ThreeDotsPopover from "./ThreeDotsPopover";
-function IntroVideo({ shop_owner }) {
+function IntroVideo({ shop_owner, updateGetstart }) {
     return (
         <div className="Polaris-LegacyCard">
             <div className="Polaris-MediaCard">
@@ -57,7 +57,7 @@ function IntroVideo({ shop_owner }) {
                                                     '--pc-inline-stack-flex-direction-xs': 'row',
                                                 }}
                                             >
-                                                <ThreeDotsPopover />
+                                                <ThreeDotsPopover updateGetstart={updateGetstart} />
 
                                             </div>
                                         </div>

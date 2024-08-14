@@ -1,4 +1,4 @@
-import { Banner, BlockStack, Card, Divider, Form, FormLayout, Grid, Select, Text, TextField } from "@shopify/polaris";
+import { BlockStack, Card, Divider, Form, FormLayout, Grid, Select, Text, TextField } from "@shopify/polaris";
 import styles from "../styles/welcome.module.css";
 import React, { useCallback, useState } from "react";
 import { authenticate } from "../shopify.server";
@@ -11,6 +11,7 @@ import Footer from "../components/Footer";
 import Sizechartborder from "../components/appsettings/Sizechartborder";
 import SizePlacement from "../components/appsettings/SizePlacement";
 import AppEmbdedBanner from "../components/AppEmbdedBanner";
+import db from '../db.server';
 
 export const loader = async ({ request }) => {
     const { admin } = await authenticate.admin(request);
@@ -23,15 +24,32 @@ export const loader = async ({ request }) => {
           }
         }
     `);
+
+
     const data = await response.json();
-    return { data };
+    const icons = await db.chartIcons.findMany();
+
+    if (icons && data) {
+        return { data, icons };
+    }
+    if (data) {
+        return { data };
+    }
+    if (icons) {
+        return { icons };
+    }
+    return null
 }
+
+
 
 export default function Settings() {
     const [selected, setSelected] = useState('en');
-    const { data } = useLoaderData();
+    const { data, icons } = useLoaderData();
     const displayNames = useDisplayNames('en');
     const [value, setValue] = useState('');
+
+    console.log('icons', icons)
     const handleChange = useCallback(
         (newValue) => setValue(newValue),
         [],
@@ -110,10 +128,10 @@ export default function Settings() {
                                 </FormLayout.Group>
                                 <Divider />
                                 <BlockStack gap="500">
-                                    <Text as="h2" variant="headingSm">Icon</Text>
+                                    <Text as="h2" variant="headingSm">Icons</Text>
                                 </BlockStack>
                             </FormLayout>
-                            <GridIcons />
+                            <GridIcons icons={icons} />
                         </Card>
                     </Grid.Cell>
                     <SizePlacement />

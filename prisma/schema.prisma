@@ -14,10 +14,10 @@ datasource db {
 }
 
 model Session {
-  id            String    @id
+  id            String         @id
   shop          String
   state         String
-  isOnline      Boolean   @default(false)
+  isOnline      Boolean        @default(false)
   scope         String?
   expires       DateTime?
   accessToken   String
@@ -25,10 +25,11 @@ model Session {
   firstName     String?
   lastName      String?
   email         String?
-  accountOwner  Boolean   @default(false)
+  accountOwner  Boolean        @default(false)
   locale        String?
-  collaborator  Boolean?  @default(false)
-  emailVerified Boolean?  @default(false)
+  collaborator  Boolean?       @default(false)
+  emailVerified Boolean?       @default(false)
+  welcomeScreen WelcomeScreen?
 }
 
 model SizeCategory {
@@ -36,4 +37,23 @@ model SizeCategory {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model WelcomeScreen {
+  id           Int      @id @default(autoincrement())
+  EmbedApp     Boolean  @default(false)
+  GettingStart Boolean  @default(false)
+  session      Session  @relation(fields: [sessionId], references: [id])
+  sessionId    String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ChartIcons {
+  id        Int      @id @default(autoincrement())
+  name      String
+  type      String
+  size      Int
+  path      String
+  createdAt DateTime @default(now())
 }

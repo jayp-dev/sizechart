@@ -25,6 +25,10 @@ export function validateFields(data) {
       errors.name = "name is required";
     }
 
+    if(!data.sessionId) {
+      errors.shop = "Shop is not Valid"
+    }
+
   if (Object.keys(errors).length) {
     return errors;
   }
