@@ -87,7 +87,6 @@ function Icons() {
 
     const handleSelect = () => {
         const formData = new FormData();
-        // console.log('file', file)
         if (file) {
             formData.append("image", file);
             submit(formData, { method: 'post', encType: "multipart/form-data" });
@@ -126,13 +125,13 @@ function Icons() {
                                     <BlockStack>
                                         <Grid>
                                             {icons.map((icon, index) =>
-                                                <>
+                                                <div key={icon.id}>
                                                     <Grid.Cell columnSpan={{ xs: 2, sm: 3, md: 3, lg: 2, xl: 2 }}>
                                                         <BlockStack inlineAlign="center" gap="400">
                                                             <Thumbnail alt={`Icon_${index}`} source={`/uploads/${icon.name}`}></Thumbnail>
                                                         </BlockStack>
                                                     </Grid.Cell>
-                                                </>
+                                                </div>
                                             )}
                                         </Grid>
 

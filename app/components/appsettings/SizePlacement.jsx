@@ -1,18 +1,9 @@
 
 import { BlockStack, Box, Card, Grid, Image, InlineGrid, RadioButton, Text } from "@shopify/polaris";
-import { useCallback, useState } from "react";
-
-
-function SizePlacement() {
-    const [value, setValue] = useState('button_floating');
-    const handleChange = useCallback(
-        (newValue) =>
-            setValue(newValue),
-        [],
-    );
+function SizePlacementSetting({ handleChange, formValues }) {
     const RowData = [
-        { id: 'button_floating', label: 'Floating on page', text: 'button_floating', imageSrc: '/assets/images/button_floating.svg' },
-        { id: 'button_inline', label: 'Inline with text', text: 'button_inline', imageSrc: '/assets/images/button_inline.svg' },
+        { id: 'button_floating', label: 'Floating on page', text: 'floating', imageSrc: '/assets/images/button_floating.svg' },
+        { id: 'button_inline', label: 'Inline with text', text: 'inline', imageSrc: '/assets/images/button_inline.svg' },
     ];
 
     const containerStyle = {
@@ -26,7 +17,7 @@ function SizePlacement() {
     return (
         <Grid.Cell columnSpan={{ xs: 6, sm: 4, md: 4, lg: 11, xl: 12 }}>
             <Card roundedAbove="sm">
-                {console.log(value)}
+
                 <BlockStack gap="400">
                     <Text as="h2" variant="headingSm">Automatic placement</Text>
                     <div style={{ width: '100%', height: 'auto' }}>
@@ -37,10 +28,10 @@ function SizePlacement() {
                                         <Image source={item.imageSrc} alt="border" width="100%" />
                                         <RadioButton
                                             label={item.label}
-                                            checked={value === item.text}
+                                            checked={formValues.SizePlacement === item.text}
                                             id={item.id}
                                             name="button_placement"
-                                            onChange={() => handleChange(item.text)}
+                                            onChange={() => handleChange('SizePlacement')(item.text)}
                                         />
                                     </BlockStack>
                                 </Box>
@@ -53,4 +44,4 @@ function SizePlacement() {
     );
 }
 
-export default SizePlacement
+export default SizePlacementSetting

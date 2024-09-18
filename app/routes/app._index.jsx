@@ -8,6 +8,7 @@ import IntroVideo from "../components/IntroVideo";
 import Footer from "../components/Footer";
 import { GetAppEnable, GetWelscreenData, Getstarted, updatewelcomescreen } from "../models/WelcomeScreen";
 import { useEffect, useState } from "react";
+import { getShopFromRequestSettings } from "../models/ShopSettings";
 
 export const loader = async ({ request }) => {
   const extensionId = process.env.SHOPIFY_SIZECHARTPRO_ID;
@@ -18,6 +19,7 @@ export const loader = async ({ request }) => {
   const data = await GetWelscreenData();
   const isAppEnable = await GetAppEnable(admin, session, extensionId);
   const Getstart = await Getstarted(session, isAppEnable);
+  await getShopFromRequestSettings(session);
   return { shop, addAppBlockId, data, isAppEnable, Getstart };
 };
 

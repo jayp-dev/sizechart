@@ -1,15 +1,6 @@
 
 import { BlockStack, Box, Card, Grid, Image, InlineGrid, RadioButton, Text } from "@shopify/polaris";
-import { useCallback, useState } from "react";
-
-
-function Sizechartborder() {
-    const [value, setValue] = useState('tunnel');
-    const handleChange = useCallback(
-        (newValue) =>
-            setValue(newValue),
-        [],
-    );
+function Sizechartborder({ handleChange, formValues }) {
     const RowData = [
         { id: 'tunnel', text: 'tunnel', imageSrc: '/assets/images/border_a_tunnel.svg' },
         { id: 'lines', text: 'lines', imageSrc: '/assets/images/border_b_lines.svg' },
@@ -36,10 +27,10 @@ function Sizechartborder() {
                                     <BlockStack gap={400} style={containerStyle}>
                                         <Image source={item.imageSrc} alt="border" width="100%" />
                                         <RadioButton
-                                            checked={value === item.text}
+                                            checked={formValues.borderStyle === item.text}
                                             id={item.id}
                                             name="border_color"
-                                            onChange={() => handleChange(item.text)}
+                                            onChange={() => handleChange('borderStyle')(item.text)}
                                         />
                                     </BlockStack>
                                 </Box>

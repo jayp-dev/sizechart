@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { BlockStack, Card, Grid, Text } from "@shopify/polaris";
 import InlineGridWithVaryingGapExample from '../appsettings/InlineGridWithVaryingGapExample';
 
-function SizechartColors() {
+function SizechartColors({ handleChange, formValues, GetSettings }) {
     const [colors, setColors] = useState({
-        Header: { hue: 300, brightness: 1, saturation: 0.7 },
-        Header_font: { hue: 300, brightness: 1, saturation: 0.7 },
-        Zebra_lines: { hue: 300, brightness: 1, saturation: 0.7 },
-        Focus: { hue: 300, brightness: 1, saturation: 0.7 }
+        headerColor: JSON.parse(GetSettings.headerColor),
+        headerFontColor: JSON.parse(GetSettings.headerFontColor),
+        zebraLinesColor: JSON.parse(GetSettings.zebraLinesColor),
+        focusColor: JSON.parse(GetSettings.focusColor)
     });
 
     const updateColor = (id, newColor) => {
@@ -16,13 +16,14 @@ function SizechartColors() {
             ...prevColors,
             [id]: newColor
         }));
-    };
 
+        handleChange(id)(JSON.stringify(newColor))
+    };
     const RowData = [
-        { id: 'Header', text: 'Header', imageSrc: '/assets/images/color_header.svg' },
-        { id: 'Header_font', text: 'Header font', imageSrc: '/assets/images/color_font_header.svg' },
-        { id: 'Zebra_lines', text: 'Zebra lines', imageSrc: '/assets/images/color_zebra.svg' },
-        { id: 'Focus', text: 'Focus', imageSrc: '/assets/images/color_focus.svg' },
+        { id: 'headerColor', text: 'Header', imageSrc: '/assets/images/color_header.svg' },
+        { id: 'headerFontColor', text: 'Header font', imageSrc: '/assets/images/color_font_header.svg' },
+        { id: 'zebraLinesColor', text: 'Zebra lines', imageSrc: '/assets/images/color_zebra.svg' },
+        { id: 'focusColor', text: 'Focus', imageSrc: '/assets/images/color_focus.svg' },
     ];
 
     return (

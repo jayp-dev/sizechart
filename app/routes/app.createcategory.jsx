@@ -68,7 +68,7 @@ export async function action({ request, params }) {
 function Createcategory() {
     const actionData = useActionData();
     const { categories, page, pageSize, totalPages } = useLoaderData();
-
+    console.log(actionData);
     const [formState, setFormState] = useState('');
     const [showToast, setShowToast] = useState(false);
     const navigate = useNavigate();
@@ -229,7 +229,6 @@ function Createcategory() {
                             bulkActions={bulkActions}
                             pagination={{
                                 hasNext: page < totalPages,
-                                // onNext: () => handleChangePage(page + 1),
                                 hasPrevious: page > 1,
                                 onPrevious: () => handleChangePage(page - 1),
                                 onNext: () => { handleChangePage(page + 1) },

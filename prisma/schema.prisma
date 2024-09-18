@@ -14,46 +14,145 @@ datasource db {
 }
 
 model Session {
-  id            String         @id
-  shop          String
-  state         String
-  isOnline      Boolean        @default(false)
-  scope         String?
-  expires       DateTime?
-  accessToken   String
-  userId        BigInt?
-  firstName     String?
-  lastName      String?
-  email         String?
-  accountOwner  Boolean        @default(false)
-  locale        String?
-  collaborator  Boolean?       @default(false)
-  emailVerified Boolean?       @default(false)
-  welcomeScreen WelcomeScreen?
+  id             String           @id
+  shop           String
+  state          String
+  isOnline       Boolean          @default(false)
+  scope          String?
+  expires        DateTime?
+  accessToken    String
+  userId         BigInt?
+  firstName      String?
+  lastName       String?
+  email          String?
+  accountOwner   Boolean          @default(false)
+  locale         String?
+  collaborator   Boolean?         @default(false)
+  emailVerified  Boolean?         @default(false)
+  welcomeScreen  WelcomeScreen?
+  ShopSettings   ShopSettings?
+  ShopImages     ShopImages?
+  // StoreChart    StoreChart[]
+  StoreSizeChart StoreSizeChart[]
 }
 
 model SizeCategory {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  PredefinedSizeChart PredefinedSizeChart[]
 }
 
 model WelcomeScreen {
   id           Int      @id @default(autoincrement())
   EmbedApp     Boolean  @default(false)
   GettingStart Boolean  @default(false)
-  session      Session  @relation(fields: [sessionId], references: [id])
+  session      Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   sessionId    String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model ChartIcons {
+  id           Int            @id @default(autoincrement())
+  name         String
+  type         String
+  size         Int
+  path         String
+  createdAt    DateTime       @default(now())
+  ShopSettings ShopSettings[]
+}
+
+model ShopSettings {
+  id              Int        @id @default(autoincrement())
+  sizeGuideTitle  String
+  BannerEnable    Boolean    @default(true)
+  icon            ChartIcons @relation(fields: [ChartIconId], references: [id])
+  ChartIconId     Int
+  shop            Session    @relation(fields: [ShopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ShopId          String     @unique
+  customCss       String?
+  SizePlacement   String     @default("inline")
+  headerColor     String     @default("{\"hue\":200,\"brightness\":0.71923828125,\"saturation\":0.945703125}")
+  headerFontColor String     @default("{\"hue\":150,\"brightness\":0.73173828125,\"saturation\":0.874609375}")
+  zebraLinesColor String     @default("{\"hue\":100,\"brightness\":0.81923828125,\"saturation\":0.759765625}")
+  focusColor      String     @default("{\"hue\":300,\"brightness\":0.73798828125,\"saturation\":0.932421875}")
+  borderStyle     String     @default("tunnel")
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model ShopImages {
   id        Int      @id @default(autoincrement())
-  name      String
-  type      String
-  size      Int
-  path      String
+  images    String   @default("[]")
+  shop      Session  @relation(fields: [ShopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ShopId    String   @unique
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PredefinedSizeChart {
+  id                     String           @id @default(cuid())
+  name                   String
+  sizeCategory           SizeCategory     @relation(fields: [sizeCategoryId], references: [id])
+  sizeCategoryId         Int
+  status                 String           @default("draft")
+  allow_converter        Boolean          @default(true)
+  allow_converter_in     Int              @default(1)
+  rounding_mode          String           @default("auto")
+  rounding_numOfDecimals Int              @default(1)
+  rounding_roundTo       Decimal          @default(0.1)
+  content                String           @default("")
+  image                  String           @default("")
+  user_chart_data        String           @default("[]") // Stores the size chart data as a JSON string
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  StoreSizeChart         StoreSizeChart[]
+}
+
+model StoreSizeChart {
+  id                     String              @id @default(cuid())
+  name                   String
+  shop                   Session             @relation(fields: [ShopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ShopId                 String
+  template               PredefinedSizeChart @relation(fields: [templateId], references: [id])
+  templateId             String
+  status                 String              @default("draft")
+  allow_converter        Boolean             @default(true)
+  allow_converter_in     Int                 @default(1)
+  rounding_mode          String              @default("auto")
+  rounding_numOfDecimals Int                 @default(1)
+  rounding_roundTo       Decimal             @default(0.1)
+  content                String              @default("")
+  image                  String              @default("")
+  user_chart_data        String              @default("[]") // Stores the size chart data as a JSON string
+  LinkedProduct          LinkedProduct[]
+  LinkedCollection       LinkedCollection[]
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+}
+
+model LinkedProduct {
+  id               String          @id @default(cuid())
+  productId        String // Unique ID of the product
+  storeId          String
+  productTitle     String // Title of the linked product
+  createdAt        DateTime        @default(now())
+  StoreSizeChart   StoreSizeChart? @relation(fields: [storeSizeChartId], references: [id])
+  storeSizeChartId String?
+
+  @@unique([storeId, productId])
+}
+
+model LinkedCollection {
+  id               String          @id @default(cuid())
+  collectionId     String // Unique ID of the collection
+  collectionTitle  String // Title of the linked collection
+  storeId          String
+  createdAt        DateTime        @default(now())
+  StoreSizeChart   StoreSizeChart? @relation(fields: [storeSizeChartId], references: [id])
+  storeSizeChartId String?
+
+  @@unique([storeId, collectionId])
 }

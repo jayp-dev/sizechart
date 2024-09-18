@@ -2,7 +2,11 @@
 import db from "../db.server";
 
 export async function getSizeCategories() {
-  const categories = await db.sizeCategory.findMany();
+  const categories = await db.sizeCategory.findMany({
+    include: {
+      PredefinedSizeChart: true // Assuming `chart` is the relation name in your Prisma schema
+    }
+  });
   if (!categories) {
     return null;
   }
@@ -24,11 +28,6 @@ export function validateFields(data) {
     if (!data.name) {
       errors.name = "name is required";
     }
-
-    if(!data.sessionId) {
-      errors.shop = "Shop is not Valid"
-    }
-
   if (Object.keys(errors).length) {
     return errors;
   }

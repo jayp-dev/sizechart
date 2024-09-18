@@ -2,7 +2,7 @@ import { BlockStack, Box, Button, ButtonGroup, Card, Divider, Grid, InlineStack,
 import React from "react"
 import { PlusIcon } from '@shopify/polaris-icons';
 
-function AppCssInformation() {
+function AppCssInformation({ addAppBlockId, shop }) {
     return (
         <Grid.Cell columnSpan={{ xs: 6, sm: 4, md: 4, lg: 11, xl: 12 }}>
             <Card roundedAbove="sm">
@@ -31,7 +31,9 @@ function AppCssInformation() {
                                         icon={PlusIcon}
                                         variant="secondary"
                                         onClick={() => { }}
-                                        accessibilityLabel="Create shipping label"
+                                        accessibilityLabel="Open Theme editor"
+                                        target="_blank"
+                                        url={`https://${shop.data[0].myshopify_domain}/admin/themes/current/editor?template=product`}
 
                                     >
                                         Open theme editor
@@ -54,7 +56,9 @@ function AppCssInformation() {
                                 icon={PlusIcon}
                                 variant="secondary"
                                 onClick={() => { }}
-                                accessibilityLabel="Create shipping label"
+                                accessibilityLabel="Adjust horizontal position"
+                                target="_blank"
+                                url={`https://${shop.data[0].myshopify_domain}/admin/themes/current/editor?context=apps&appEmbed=${addAppBlockId}&template=product`}
 
                             >
                                 Adjust horizontal position

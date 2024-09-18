@@ -3,6 +3,7 @@ import styles from './SizeChartTable.module.css';
 import ContextMenu from './ContextMenu';
 import { DeleteIcon, ClipboardIcon, DuplicateIcon, PlusCircleIcon } from '@shopify/polaris-icons';
 
+
 export let links = () => {
     return [{ rel: "stylesheet", href: styles }];
 };
@@ -11,11 +12,6 @@ const SizeChartTable = ({ handleContentChange, columns, tableData, setColumns, s
     const [contextMenu, setContextMenu] = useState(null);
     const contextMenuRef = useRef(null);
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        console.log(tableData);
-        console.log(JSON.stringify(tableData));
-    };
 
     const handleContextMenu = (event, rowIndex, colIndex) => {
         event.preventDefault();
@@ -107,26 +103,32 @@ const SizeChartTable = ({ handleContentChange, columns, tableData, setColumns, s
         setTableData(updatedTableData);
     };
 
-    // Insert a column to the left or right of a specific column
     const insertColumn = (colIndex, position) => {
-        const newColumn = '';
+        // Generate a unique column name
+        const newColumn = `Column ${columns.length + 1}`;
+        let columnName = newColumn;
+
+        while (columns.includes(columnName)) {
+            columnName = `Column ${Math.random().toString(36).substring(7)}`;
+        }
 
         const updatedColumns = [...columns];
-        const updatedTableData = [...tableData];
+        const updatedTableData = tableData.map(row => ({ ...row }));
 
         if (position === 'left') {
-            updatedColumns.splice(colIndex, 0, newColumn);
+            updatedColumns.splice(colIndex, 0, columnName);
         } else if (position === 'right') {
-            updatedColumns.splice(colIndex + 1, 0, newColumn);
+            updatedColumns.splice(colIndex + 1, 0, columnName);
         }
 
         updatedTableData.forEach(row => {
-            row[newColumn] = '';
+            row[columnName] = ''; // Initialize the new column with empty values
         });
 
         setColumns(updatedColumns);
         setTableData(updatedTableData);
     };
+
 
     // Delete a specific row
     const deleteRow = (rowIndex) => {
@@ -170,7 +172,7 @@ const SizeChartTable = ({ handleContentChange, columns, tableData, setColumns, s
     return (
         <div className={styles.container}>
             <h2>Dynamic Size Chart</h2>
-            <form onSubmit={handleSubmit}>
+            <form>
                 <div className={styles.sizedata}>
                     <div className={styles.table}>
                         <div className={styles.thead}>

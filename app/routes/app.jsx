@@ -22,13 +22,15 @@ export default function App() {
         <Link to="/app" rel="home">
           Home
         </Link>
-        <Link to="/app/templates">Templates</Link>
+        <Link to="/app/templates?from=linked_products">Templates</Link>
+        <Link to="/app/linkedproducts">Linked products</Link>
         <Link to="/app/settings">Settings</Link>
         {session.shop === 'gifting4.myshopify.com' && (
           <>
-            <Link to="/app/createcategory">Create Category</Link>
+            <Link to="/app/templates?from=admin">Admin Templates</Link>
+            <Link to="/app/createcategory">Create category</Link>
             <Link to="/app/createsizechart/admin">Create sizechart</Link>
-            <Link to="/app/icons/admin">Create Icons</Link>
+            <Link to="/app/icons/admin">Create icons</Link>
           </>
         )}
       </NavMenu>

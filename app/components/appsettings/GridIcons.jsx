@@ -2,27 +2,27 @@ import React from 'react';
 import { RadioButton, BlockStack, Grid, Thumbnail, Box } from '@shopify/polaris';
 import styles from '../appsettings/appsettings.module.css';
 
-function GridExample({ icons }) {
-    const [selected, setSelected] = React.useState('option1');
-    const handleChange = (value) => setSelected(value);
+function GridExample({ icons, handleChange, formValues }) {
     return (
         <>
             <Box paddingBlockStart={200}>
                 <Grid>
                     {icons.map((icon, index) =>
-                        <>
+                        <div key={icon.id}>
                             <Grid.Cell columnSpan={{ xs: 2, sm: 3, md: 3, lg: 1, xl: 1 }}>
                                 <BlockStack inlineAlign="center" gap="400">
                                     <Thumbnail alt={`Icon_${index}`} source={`/uploads/${icon.name}`}></Thumbnail>
                                     <RadioButton
-                                        checked={selected === icon.id}
+                                        key={icon.id}
+                                        checked={formValues.ChartIconId === icon.id}
                                         id={icon.id}
                                         name="radioGroup"
-                                        onChange={() => handleChange(icon.id)}
+                                        onChange={() => handleChange('ChartIconId')(icon.id)}
+
                                     />
                                 </BlockStack>
                             </Grid.Cell>
-                        </>
+                        </div>
                     )}
                 </Grid>
             </Box>

@@ -17,9 +17,6 @@ function CustomPopover({ id, label, item, color, setColor }) {
         setInternalColor(newColor);
         setColor(newColor);
     };
-
-    console.log(getColorValueHex());
-
     return (
         <Popover
             active={active}
