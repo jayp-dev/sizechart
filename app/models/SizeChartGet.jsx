@@ -12,6 +12,64 @@ export async function PredefinedSizeChartGet(session, chartId, from) {
     }
 }
 
+export async function DashboardSizeCharts(session, page, pageSize) {
+    try {
+        const pageData = page; // Ensure page is at least 1
+        const pageSizeData = pageSize; // Define the number of records per page
+
+        const response = await db.storeSizeChart.findMany({
+            where: {
+                ShopId: session.id, // Ensure session.id is correct
+            },
+            include: {
+                LinkedProduct: true, // Include related products
+                LinkedCollection: true, // Include related collections
+            },
+            skip: (pageData - 1) * pageSizeData, // Correct pagination logic
+            take: pageSizeData,
+        });
+
+
+        const totalItems = await db.storeSizeChart.count({ where: { ShopId: session.id } });
+        if (!response.error) {
+
+            const extractedItem = response.map(item => ({
+                id: item.id,
+                name: item.name,
+                ShopId: item.ShopId,
+                templateId: item.templateId,
+                status: item.status,
+                LinkedProduct: item.LinkedProduct.length,
+                LinkedCollection: item.LinkedCollection.length,
+                createdAt: item.createdAt,
+                updatedAt: item.updatedAt,
+            }));
+            return { status: 200, success: true, response: extractedItem, totalItems }
+        }
+        return { error: 'Charts not found', status: 500, success: false }
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+export async function StoreSizeChartGet(session, chartId, from) {
+    try {
+        const response = await db.storeSizeChart.findMany({
+            where: { id: chartId },
+            include: {
+                LinkedProduct: true, // Include the related products for each order
+                LinkedCollection: true,
+            },
+        });
+        if (!response.error) {
+            return { status: 200, success: true, response: response }
+        }
+        return { error: 'chart not found', status: 500, success: false }
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
 export async function ShopSizeCharts(session, admin, page, pageSize) {
     try {
         // const shop

@@ -10,7 +10,7 @@ import invariant from 'tiny-invariant';
 export async function loader({ request }) {
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get("page")) || 1;
-    const pageSize = parseInt(url.searchParams.get("pageSize")) || 5;
+    const pageSize = parseInt(url.searchParams.get("pageSize")) || 2;
 
     try {
         const totalItems = await db.sizeCategory.count();
@@ -68,7 +68,6 @@ export async function action({ request, params }) {
 function Createcategory() {
     const actionData = useActionData();
     const { categories, page, pageSize, totalPages } = useLoaderData();
-    console.log(actionData);
     const [formState, setFormState] = useState('');
     const [showToast, setShowToast] = useState(false);
     const navigate = useNavigate();

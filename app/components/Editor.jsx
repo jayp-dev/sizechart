@@ -21,7 +21,7 @@ const Editor = ({ handleChange, EditorContent }) => {
                     editor.on('Change KeyUp', () => {
                         const content = editor.getContent();
                         handleChange('content', content);
-                        console.log('Content was updated:', content);
+                        // console.log('Content was updated:', content);
                     });
                 },
             });
@@ -33,7 +33,7 @@ const Editor = ({ handleChange, EditorContent }) => {
                 window.tinymce.remove();
             }
         };
-    }, [handleChange, EditorContent]);
+    }, [handleChange]);
 
     return (
         <textarea id="editor" />
@@ -41,3 +41,6 @@ const Editor = ({ handleChange, EditorContent }) => {
 };
 
 export default Editor;
+
+
+

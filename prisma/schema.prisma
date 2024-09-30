@@ -98,6 +98,7 @@ model PredefinedSizeChart {
   sizeCategory           SizeCategory     @relation(fields: [sizeCategoryId], references: [id])
   sizeCategoryId         Int
   status                 String           @default("draft")
+  icon                   String           @default("")
   allow_converter        Boolean          @default(true)
   allow_converter_in     Int              @default(1)
   rounding_mode          String           @default("auto")
@@ -139,19 +140,20 @@ model LinkedProduct {
   storeId          String
   productTitle     String // Title of the linked product
   createdAt        DateTime        @default(now())
-  StoreSizeChart   StoreSizeChart? @relation(fields: [storeSizeChartId], references: [id])
+  StoreSizeChart   StoreSizeChart? @relation(fields: [storeSizeChartId], references: [id], onDelete: Cascade)
   storeSizeChartId String?
 
   @@unique([storeId, productId])
 }
 
 model LinkedCollection {
-  id               String          @id @default(cuid())
-  collectionId     String // Unique ID of the collection
-  collectionTitle  String // Title of the linked collection
-  storeId          String
-  createdAt        DateTime        @default(now())
-  StoreSizeChart   StoreSizeChart? @relation(fields: [storeSizeChartId], references: [id])
+  id              String          @id @default(cuid())
+  collectionId    String // Unique ID of the collection
+  collectionTitle String // Title of the linked collection
+  storeId         String
+  createdAt       DateTime        @default(now())
+  StoreSizeChart  StoreSizeChart? @relation(fields: [storeSizeChartId], references: [id], onDelete: Cascade)
+
   storeSizeChartId String?
 
   @@unique([storeId, collectionId])

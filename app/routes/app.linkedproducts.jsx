@@ -35,9 +35,12 @@ function LinkedProducts() {
         navigate("/app/templates?from=linked_products");
     };
 
+    const Viewsizecharts = async () => {
+        navigate("/app/dashboard");
+    };
+
     useEffect(() => {
         const data = sizecharts.response;
-        console.log(data);
         setChartData(data);
     }, [sizecharts]);
 
@@ -52,7 +55,7 @@ function LinkedProducts() {
                 disabled: false,
                 onAction: createHandle,
             }}
-            secondaryActions={[{ content: "View size charts", icon: DataTableIcon }]}
+            secondaryActions={[{ content: "View size charts", icon: DataTableIcon, onAction: Viewsizecharts }]}
         >
             {!sizecharts.error ? (
                 <LinkedTable chartData={chartData} page={page} pageSize={pageSize} totalPages={totalPages} />

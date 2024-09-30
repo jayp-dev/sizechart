@@ -170,7 +170,7 @@ function TabsInsideOfACardExample({ categories, from }) {
             <BlockStack gap={500} align="center">
                 <div id={`panel-${tabs[selected].id}`} style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {tabs[selected].size_charts.map((item) => (
-                        <div key={item.id} style={{ width: '25%', textAlign: 'center', margin: '0 10px' }}>
+                        <div key={item.id} style={{ width: '20%', textAlign: 'center', margin: '0 10px' }}>
                             <Box background="bg-surface" borderRadius="200" shadow="500" minWidth="200" maxWidth="300">
                                 <Placeholder>
                                     {item.image ? <Image source={item.image} width="50%" alt={item.name} /> : ''}

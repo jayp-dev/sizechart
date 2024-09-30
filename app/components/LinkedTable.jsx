@@ -16,7 +16,6 @@ function LinkedTable({ chartData, page, totalPages, pageSize }) {
     const navigate = useNavigate();
     const handleChangePage = (newPage) => {
         const searchParams = new URLSearchParams(window.location.search);
-        console.log(searchParams)
         searchParams.set('page', newPage);
         searchParams.set('pageSize', pageSize);
         navigate(`/app/linkedproducts?${searchParams.toString()}`);
@@ -41,9 +40,16 @@ function LinkedTable({ chartData, page, totalPages, pageSize }) {
         }
     };
 
+
+    const HandleEdit = (chart_id) => {
+        if (chart_id) {
+            navigate(`/app/createsizechart/edit_chart?chart_id=${chart_id}&from=user_chart`);
+        }
+    };
+
     const rowMarkup = chartData.map(
         (
-            { id, status, name, type, collectionId, productTitle, productPreviewUrl, collectionTitle, productImage, productExId, collectionImage },
+            { id, status, name, type, collectionId, productTitle, productPreviewUrl, collectionTitle, productImage, productExId, collectionImage, storeSizeChartId },
             index,
         ) => (
             <IndexTable.Row id={id} key={id} position={index}>
@@ -65,12 +71,12 @@ function LinkedTable({ chartData, page, totalPages, pageSize }) {
                 <IndexTable.Cell>
                     <Link monochrome url={`shopify://admin/${type === 'Collection' ? `collections/${collectionId}` : `products/${productExId}`}`}> {type === 'Collection' ? collectionTitle : productTitle}</Link>
                 </IndexTable.Cell>
-                <IndexTable.Cell>{type}</IndexTable.Cell>
-                <IndexTable.Cell> <Badge size="small" tone={status == 'draft' ? '' : 'success'}>{status}</Badge></IndexTable.Cell>
+                <IndexTable.Cell> <Badge size="small" tone={status == 'draft' ? '' : 'success'}> {status == 'draft' ? 'Draft' : 'Active'}</Badge></IndexTable.Cell>
                 <IndexTable.Cell>
                     {name}
                 </IndexTable.Cell>
                 <IndexTable.Cell><Badge size="small">{type}</Badge></IndexTable.Cell>
+                <IndexTable.Cell><Button onClick={() => HandleEdit(storeSizeChartId)}>Edit chart</Button></IndexTable.Cell>
                 <IndexTable.Cell><Button onClick={() => HandleViewPreview(productPreviewUrl)}>View chart</Button></IndexTable.Cell>
             </IndexTable.Row>
         ),
@@ -86,10 +92,10 @@ function LinkedTable({ chartData, page, totalPages, pageSize }) {
                 headings={[
                     { title: '' },
                     { title: 'product', alignment: 'start' },
-                    { title: 'Size chart' },
                     { title: 'Status' },
                     { title: 'Name' },
                     { title: 'Linked Via' },
+                    { title: '  ' },
                     { title: ' ' },
 
                 ]}

@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node"
-import { Badge, Banner, Bleed, BlockStack, Box, Button, ButtonGroup, Card, Divider, InlineGrid, InlineStack, Layout, Link, Page, PageActions, Select, Tag, Text, TextField, } from "@shopify/polaris";
+import { Badge, Banner, Bleed, BlockStack, Box, Button, ButtonGroup, Card, Divider, DropZone, InlineGrid, InlineStack, Layout, Link, Page, PageActions, Select, Text, TextField, } from "@shopify/polaris";
 import { useLoaderData } from "react-router";
 import { PersonalizedTextIcon, ViewIcon, DataTableIcon, ResetIcon, AlertCircleIcon, PlusCircleIcon, CollectionIcon, ProductIcon, MaximizeIcon } from '@shopify/polaris-icons';
 import AppEmbdedBanner from "../components/AppEmbdedBanner";
@@ -12,14 +12,14 @@ import { authenticate } from "../shopify.server";
 import ShowLinkedItems from "../components/SizeChart/ShowLinkedItems";
 import { getSizeCategories } from "../models/sizeCategories.server";
 import { ImageSaveInApp } from "../models/ImageSaveInApp";
-import { useActionData, useSubmit } from "@remix-run/react";
+import { useActionData, useSubmit, useNavigate } from "@remix-run/react";
 import { ShopImagesGet } from "../models/ShopImagesGet";
 import { PredefinedSize } from "../models/PredefinedSize";
-import { PredefinedSizeChartGet } from "../models/SizeChartGet";
+import { PredefinedSizeChartGet, StoreSizeChartGet } from "../models/SizeChartGet";
 import { AdminSizeUpdate } from "../models/AdminSizeUpdate";
-import { UserSizeChartCreate } from "../models/UserSizeChart";
-
-
+import { UserSizeChartCreate, UserSizeChartUpdate } from "../models/UserSizeChart";
+import { fetchOtherSizeChartCollections, fetchOtherSizeChartProducts } from "../models/FetchSelected";
+import InlineDropZone from "../components/InlineDropZone";
 
 export const loader = async ({ request, params }) => {
     const { admin, session } = await authenticate.admin(request);
@@ -32,20 +32,28 @@ export const loader = async ({ request, params }) => {
     const application_url = process.env.SHOPIFY_APP_URL || "";
     const SizeCategory = await getSizeCategories();
     const chartImages = await ShopImagesGet(session, admin);
+    const SelectedProducts = await fetchOtherSizeChartProducts(session);
+    const SelectedCollections = await fetchOtherSizeChartCollections(session);
     if (params.id === 'admin') {
-        return json({ addAppBlockId, isAppEnable, shop, isAdmin: true, SizeCategory, application_url, chartImages });
+        return json({ addAppBlockId, isAppEnable, shop, isAdmin: true, SizeCategory, application_url, chartImages, SelectedProducts, SelectedCollections });
     }
 
     if (params.id === 'edit_chart') {
         const chartId = url.searchParams.get("chart_id");
         const from = url.searchParams.get("from");
+        if (from === 'user_chart') {
+            const sizechart = await StoreSizeChartGet(session, chartId, from);
+            if (sizechart.status == 200) {
+                return json({ addAppBlockId, isAppEnable, shop, isAdmin: false, SizeCategory, application_url, chartImages, sizechart: sizechart.response[0], from, SelectedProducts, SelectedCollections });
+            }
+        }
         const sizechart = await PredefinedSizeChartGet(session, chartId, from);
         if (sizechart.status == 200) {
-            return json({ addAppBlockId, isAppEnable, shop, isAdmin: false, SizeCategory, application_url, chartImages, sizechart: sizechart.response[0], from });
+            return json({ addAppBlockId, isAppEnable, shop, isAdmin: false, SizeCategory, application_url, chartImages, sizechart: sizechart.response[0], from, SelectedProducts, SelectedCollections });
         }
     }
 
-    return json({ addAppBlockId, isAppEnable, shop, SizeCategory, chartImages });
+    return json({ addAppBlockId, isAppEnable, shop, SizeCategory, chartImages, SelectedProducts, SelectedCollections });
 
 }
 export const action = async ({ request, params }) => {
@@ -68,14 +76,20 @@ export const action = async ({ request, params }) => {
             return json({ Response })
         } else if (from === 'admin') {
             const response = await AdminSizeUpdate(formValues, tableData, session, chartId)
-            return json({ success: true, message: 'Admin coming successfully', response })
+            return json({ success: true, message: 'Admin Size Update successfully', response })
         } else if (from === 'linked_products') {
             const userzise = await UserSizeChartCreate(formValues, tableData, session, chartId)
             if (!userzise.error) {
-                return json({ success: true, response: userzise })
+                return json({ success: true, response: userzise, message: 'Size chart create successfully' })
             }
 
             return json({ response: userzise })
+        } else if (from === 'user_chart') {
+            const update_userchart = await UserSizeChartUpdate(formValues, tableData, session, chartId);
+            if (!update_userchart.error) {
+                return json({ success: true, response: update_userchart, message: 'Size chart update successfully' })
+            }
+            return json({ response: update_userchart })
         }
     } catch (error) {
         console.error("Error performing action:", error);
@@ -90,10 +104,12 @@ function Createsizechart() {
         }
     }, [actionData]);
 
-    const { addAppBlockId, isAppEnable, shop, isAdmin, SizeCategory, application_url, chartImages, sizechart, from } = useLoaderData();
+    const { addAppBlockId, isAppEnable, shop, isAdmin, SizeCategory, application_url, chartImages, sizechart, from, SelectedProducts, SelectedCollections } = useLoaderData();
+
     const [columns, setColumns] = useState(['']);
     const [isButtonEnabled, setIsButtonEnabled] = useState(false);
     const [file, setFile] = useState(null);
+    const [icon, setIcon] = useState(null);
     const {
         id = '',
         name = '',
@@ -106,7 +122,9 @@ function Createsizechart() {
         rounding_roundTo = '',
         content = '',
         image = '',
-        user_chart_data = ''
+        user_chart_data = '',
+        LinkedCollection = [],
+        LinkedProduct = [],
     } = sizechart || {};
 
     useEffect(() => {
@@ -128,8 +146,16 @@ function Createsizechart() {
 
     const [formValues, setFormValues] = useState(() => {
         const defaultCategory = Categories.length > 0 ? Categories[0] : { value: '', id: '' };
+        // If sizeCategoryId exists, find the corresponding category, otherwise use the default
+        const selectedCategory = sizeCategoryId
+            ? Categories.find(category => category.id === sizeCategoryId) || defaultCategory
+            : defaultCategory;
+
         return {
-            category: { id: sizeCategoryId || defaultCategory.id, value: sizeCategoryId ? Categories.find(category => category.id === sizeCategoryId) : defaultCategory.value },
+            category: {
+                id: sizeCategoryId ? selectedCategory.id : defaultCategory.id,
+                value: sizeCategoryId ? selectedCategory.value : defaultCategory.value
+            },
             allow_converter: `${allow_converter}` || 'true',
             name: name || '',
             status: status || '',
@@ -138,11 +164,13 @@ function Createsizechart() {
             rounding_numOfDecimals: rounding_numOfDecimals || 1,
             rounding_roundTo: rounding_roundTo || 0.1,
             content: content,
-            LinkedProducts: '',
-            Linkedcollection: '',
+            LinkedProducts: LinkedProduct,
+            Linkedcollection: LinkedCollection,
             image: image || selectImage
         };
     });
+
+
     useEffect(() => {
         setFormValues((prevValues) => ({
             ...prevValues,
@@ -151,12 +179,13 @@ function Createsizechart() {
     }, [selectImage]);
 
     const [initialValues, setInitialValues] = useState(formValues);
-
-    const [linkedProducts, setLinkedProducts] = useState([]);
-    const [linkedCollections, setLinkedCollections] = useState([]);
+    const [toastMessage, setToastMessage] = useState('');
+    const [linkedProducts, setLinkedProducts] = useState(LinkedProduct);
+    const [linkedCollections, setLinkedCollections] = useState(LinkedCollection);
     const [loading, setLoading] = useState(false);
     const [showlinked, setLinked] = useState(false);
     const [bannerProducts, setbannerProducts] = useState(false);
+    const navigate = useNavigate();
     const handleContentChange = (e, rowIndex, colIndex) => {
         const value = e.target.textContent;
 
@@ -224,10 +253,6 @@ function Createsizechart() {
         { label: 'Inches', value: "2" },
     ]
 
-
-
-
-
     const showLinkedItems = useCallback(async () => {
         setLinked(!showlinked);
     }, [showlinked]);
@@ -260,6 +285,43 @@ function Createsizechart() {
         [linkedCollections, linkedProducts]
     );
 
+    // const handleProductSelection = useCallback(async () => {
+    //     setLoading(true);
+    //     try {
+    //         const selected = await shopify.resourcePicker({
+    //             type: 'product',
+    //             multiple: true,
+    //             filter: {
+    //                 hidden: true,
+    //                 variants: false,
+    //                 draft: false,
+    //                 archived: false,
+    //             },
+    //         });
+
+    //         if (selected) {
+    //             setLoading(false);
+    //             setLinkedProducts(selected || []);
+
+    //             handleChange('LinkedProducts', [
+    //                 ...selected.map(product => ({
+    //                     id: product.id,
+    //                     title: product.title,
+    //                     type: 'Product',
+    //                     imageSrc: product.images[0]?.originalSrc || '',
+    //                 }))
+    //             ])
+    //         } else {
+    //             console.log('Product picker was cancelled by the user');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error during product selection:', error);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }, [handleChange]);
+
+
     const handleProductSelection = useCallback(async () => {
         setLoading(true);
         try {
@@ -275,29 +337,65 @@ function Createsizechart() {
             });
 
             if (selected) {
-                setLoading(false);
-                setLinkedProducts(selected || []);
+                const otherSizeChartProducts = SelectedProducts;
+                const otherSizeChartProductIds = otherSizeChartProducts.map(product => product.productId);
+                const alreadyLinkedProducts = selected.filter(product =>
+                    otherSizeChartProductIds.includes(product.id)
+                );
+                const newProducts = selected.filter(product =>
+                    !otherSizeChartProductIds.includes(product.id)
+                );
 
-                handleChange('LinkedProducts', [
-                    ...selected.map(product => ({
-                        id: product.id,
-                        title: product.title,
-                        type: 'Product',
-                        imageSrc: product.images[0]?.originalSrc || '',
-                    }))
-                ])
+                if (alreadyLinkedProducts.length > 0) {
+                    shopify.toast.show(`The following products are already added to another size chart: ${alreadyLinkedProducts.map(product => product.title).join(', ')}`, {
+                        onDismiss: () => { shopify.toast.hide() }
+                    });
+                }
+
+                if (newProducts.length > 0) {
+                    setLinkedProducts(prevLinkedProducts => [
+                        ...newProducts.map(product => ({
+                            id: product.id,
+                            title: product.title,
+                            type: 'Product',
+                            imageSrc: product.images[0]?.originalSrc || '',
+                        }))
+                    ]);
+
+                    handleChange('LinkedProducts', [
+                        ...newProducts.map(product => ({
+                            id: product.id,
+                            title: product.title,
+                            type: 'Product',
+                            imageSrc: product.images[0]?.originalSrc || '',
+                        }))
+                    ]);
+
+                    if (alreadyLinkedProducts.length === 0) {
+
+                        setToastMessage('Products added successfully!');
+                        setShowToast(true);
+                    }
+                } else if (newProducts.length === 0) {
+                    shopify.toast.show(`No new products were selected or all selected products are already linked.`, {
+                        onDismiss: () => { shopify.toast.hide() }
+                    });
+                }
             } else {
-                console.log('Product picker was cancelled by the user');
+                setToastMessage('Product picker was cancelled by the user.');
+                setShowToast(true);
             }
         } catch (error) {
             console.error('Error during product selection:', error);
+            setToastMessage('An error occurred while selecting products.');
+            setShowToast(true);
         } finally {
             setLoading(false);
         }
-    }, [handleChange]);
-
+    }, [handleChange, SelectedProducts]);
 
     const handleCollectionSelection = useCallback(async () => {
+        setLoading(true);
         try {
             const selected = await shopify.resourcePicker({
                 type: 'collection',
@@ -305,21 +403,86 @@ function Createsizechart() {
             });
 
             if (selected) {
-                const ExtractCollection = [...selected.map(collection => ({
-                    id: collection.id,
-                    title: collection.title,
-                    type: 'Collection',
-                    imageSrc: '',
-                }))];
-                setLinkedCollections(selected || []);
-                handleChange('Linkedcollection', ExtractCollection)
+                const otherSizeChartCollection = SelectedCollections;
+                const otherSizeCharCollectionIds = otherSizeChartCollection.map(collection => collection.collectionId);
+                const alreadyLinkedCollections = selected.filter(collection =>
+                    otherSizeCharCollectionIds.includes(collection.id)
+                );
+                const newCollections = selected.filter(collection =>
+                    !otherSizeCharCollectionIds.includes(collection.id)
+                );
+
+                if (alreadyLinkedCollections.length > 0) {
+                    shopify.toast.show(`The following products are already added to another size chart: ${alreadyLinkedCollections.map(collection => collection.title).join(', ')}`, {
+                        onDismiss: () => { shopify.toast.hide() }
+                    });
+                }
+
+                if (newCollections.length > 0) {
+                    setLinkedCollections(prevLinkedProducts => [
+                        ...newCollections.map(collection => ({
+                            id: collection.id,
+                            title: collection.title,
+                            type: 'Collection',
+                            imageSrc: '',
+                        }))
+                    ]);
+
+                    handleChange('LinkedProducts', [
+                        ...newCollections.map(collection => ({
+                            id: collection.id,
+                            title: collection.title,
+                            type: 'Collection',
+                            imageSrc: '',
+                        }))
+                    ]);
+
+                    if (alreadyLinkedCollections.length === 0) {
+
+                        setToastMessage('Products added successfully!');
+                        setShowToast(true);
+                    }
+                } else if (newCollections.length === 0) {
+                    shopify.toast.show(`No new collection were selected or all selected collection are already linked.`, {
+                        onDismiss: () => { shopify.toast.hide() }
+                    });
+                }
             } else {
-                console.log('Collection picker was cancelled by the user');
+                setToastMessage('collection picker was cancelled by the user.');
+                setShowToast(true);
             }
         } catch (error) {
             console.error('Error during collection selection:', error);
+            setToastMessage('An error occurred while selecting products.');
+            setShowToast(true);
+        } finally {
+            setLoading(false);
         }
-    }, [handleChange]);
+    }, [handleChange, SelectedCollections]);
+
+    // const handleCollectionSelection = useCallback(async () => {
+    //     try {
+    //         const selected = await shopify.resourcePicker({
+    //             type: 'collection',
+    //             multiple: true,
+    //         });
+
+    //         if (selected) {
+    //             const ExtractCollection = [...selected.map(collection => ({
+    //                 id: collection.id,
+    //                 title: collection.title,
+    //                 type: 'Collection',
+    //                 imageSrc: '',
+    //             }))];
+    //             setLinkedCollections(selected || []);
+    //             handleChange('Linkedcollection', ExtractCollection)
+    //         } else {
+    //             console.log('Collection picker was cancelled by the user');
+    //         }
+    //     } catch (error) {
+    //         console.error('Error during collection selection:', error);
+    //     }
+    // }, [handleChange]);
 
     const handleChangeselect = (field) => (selectedValue) => {
         const selectedCategory = Categories.find(category => category.value === selectedValue);
@@ -343,7 +506,10 @@ function Createsizechart() {
         setFile(newFile);
     };
 
-
+    const HandleiconChange = (newFile) => {
+        console.log(newFile)
+        setIcon(newFile);
+    }
 
     const handleClear = () => {
         setFile(null);
@@ -399,7 +565,6 @@ function Createsizechart() {
             formValues: JSON.stringify(formValues),
             tableData: JSON.stringify(tableData)
         }
-
         submit(data, { method: 'POST' })
 
     }
@@ -412,22 +577,33 @@ function Createsizechart() {
 
     useEffect(() => {
         if (showToast) {
-            shopify.toast.show('size chart create successfully', {
+            shopify.toast.show(actionData?.message, {
                 duration: 3000,
                 onDismiss: () => { }
             });
             setShowToast(false);
         }
-    }, [showToast]);
+    }, [showToast, actionData?.message]);
     return (
         <Page
             backAction={{ content: 'Orders', url: '#' }}
             title={isAdmin ? '' : name}
             primaryAction={{ content: 'Save', disabled: !isButtonEnabled, onAction: handleSubmit }}
             secondaryActions={[
-                { content: 'View your store', icon: PersonalizedTextIcon },
-                { content: 'Preview size chart', icon: ViewIcon },
-                { content: 'View size charts', icon: DataTableIcon },
+                {
+                    content: 'View your store', icon: PersonalizedTextIcon,
+                    onAction: async () => {
+                        window.open(`https://${shop.data[0].myshopify_domain}`, "_blank");
+                    }
+                },
+                {
+                    content: 'Preview size chart', icon: ViewIcon
+                },
+                {
+                    content: 'View size charts', icon: DataTableIcon, onAction: async () => {
+                        navigate("/app/dashboard");
+                    }
+                },
             ]}
         >
             {!isAppEnable && (
@@ -455,6 +631,8 @@ function Createsizechart() {
                                     }
                                 />
                             </Box>
+
+                            <InlineDropZone OniconChange={HandleiconChange} icon={icon} />
                             {from === 'admin' && (
                                 <Box paddingBlockStart="200">
                                     <Text as="h2" variant="headingSm">
@@ -490,14 +668,14 @@ function Createsizechart() {
                             />
                         </Box>
                         <Box paddingBlockStart={400}>
-                            <Banner onDismiss={() => { }}>
+                            {/* <Banner onDismiss={() => { }}>
                                 <InlineStack gap="400" wrap={false} blockAlign="center">
                                     <p>
                                         Your size chart is not published. Set the Status to 'Active' to publish the size chart in your store.
 
                                     </p>
                                 </InlineStack>
-                            </Banner>
+                            </Banner> */}
                         </Box>
                         {bannerProducts === true && (
                             <Box paddingBlockStart={400}>
@@ -564,11 +742,10 @@ function Createsizechart() {
                                 <Text as="h3" variant="headingSm" fontWeight="medium">
                                     Note
                                 </Text>
-                                <Text as="p" variant="bodyMd">
+                                {/* <Text as="p" variant="bodyMd">
                                     The sales reports are available only if your store is on the Shopify
                                     plan or higher.
-                                </Text>
-
+                                </Text> */}
                                 <InlineStack align="space-between">
                                     <ButtonGroup gap="tight">
 

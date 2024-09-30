@@ -27,7 +27,7 @@ export async function GetAppEnable(admin, session, extensionId) {
         }
         DataTheme = JSON.parse(DataTheme.data[0].value);
         DataTheme = DataTheme.current.blocks;
-        const typeToMatch = `shopify://apps/sizechartpro/blocks/SizechartEmbed/${extensionId}`;
+        const typeToMatch = `shopify://apps/pti-size-chart-pro/blocks/SizechartEmbed/${extensionId}`;
         const matchType = (type) => {
             return Object.values(DataTheme).some(item => item.type === type && !item.disabled);
         };

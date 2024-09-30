@@ -29,6 +29,7 @@
     "@remix-run/node": "^2.7.1",
     "@remix-run/react": "^2.7.1",
     "@remix-run/serve": "^2.7.1",
+    "@shopify/app-bridge": "^3.7.10",
     "@shopify/app-bridge-react": "^4.1.2",
     "@shopify/polaris": "^12.0.0",
     "@shopify/shopify-api": "^11.0.1",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@remix-run/eslint-config": "^2.7.1",
+    "@rollup/plugin-commonjs": "^28.0.0",
     "@shopify/api-codegen-preset": "^1.0.0",
     "@types/eslint": "^8.40.0",
     "@types/node": "^20.6.3",
@@ -53,8 +55,9 @@
     "babel-plugin-module-resolver": "^5.0.2",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.4",
     "prisma": "^5.18.0",
+    "rollup": "^4.22.4",
+    "rollup-plugin-copy": "^3.5.0",
     "typescript": "^5.2.2",
     "vite": "^5.1.3"
   },

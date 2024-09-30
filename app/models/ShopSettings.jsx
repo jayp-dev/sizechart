@@ -1,9 +1,5 @@
 import db from "../db.server";
 
-// export async function ShopSettings(params) {
-
-// }
-
 export async function getShopFromRequestSettings(session) {
     const existingSettings = await db.shopSettings.findUnique({
         where: { ShopId: session.id },
@@ -53,32 +49,4 @@ export async function ShopSettingUpdate(session, data) {
 }
 
 
-// export async function ShopSettingUpdate(session, data) {
-//     try {
-//         const existingSettings = await db.shopSettings.findUnique({
-//             where: { ShopId: session.id },
-//         });
 
-//         if (existingSettings) {
-//             const updatedSettings = await db.shopSettings.update({
-//                 where: { ShopId: session.id },
-//                 data: {
-//                     sizeGuideTitle: data.sizeGuideTitle,
-//                     ChartIconId: Number(data.ChartIconId),
-//                     borderStyle: data.borderStyle ? data.borderStyle : "tunnel",
-//                     customCss: data.customCss ? data.customCss : '',
-//                     SizePlacement: data.SizePlacement ? data.SizePlacement : 'inline',
-//                     headerColor: typeof data.headerColor === 'string' ? data.headerColor : existingSettings.headerColor,
-//                     headerFontColor: typeof data.headerFontColor === 'string' ? data.headerFontColor : existingSettings.headerFontColor,
-//                     zebraLinesColor: typeof data.zebraLinesColor === 'string' ? data.zebraLinesColor : existingSettings.zebraLinesColor,
-//                     focusColor: typeof data.focusColor === 'string' ? data.focusColor : existingSettings.focusColor,
-//                 },
-//             });
-//             return updatedSettings;
-//         }
-//         return null;
-//     } catch (error) {
-//         console.error('Error updating shop settings:', error);
-//         throw error; // or handle error as needed
-//     }
-// }

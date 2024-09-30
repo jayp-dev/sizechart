@@ -8,9 +8,9 @@ function ShowLinkedItems({ linkedProducts, linkedCollections }) {
     const combinedData = [
         ...linkedProducts.map(product => ({
             id: product.id,
-            title: product.title,
+            title: product.title || product.productTitle,
             type: 'Product',
-            imageSrc: product.images[0]?.originalSrc || '',
+            imageSrc: product?.images?.[0]?.originalSrc || '',
         })),
         ...linkedCollections.map(collection => ({
             id: collection.id,
@@ -69,6 +69,7 @@ function ShowLinkedItems({ linkedProducts, linkedCollections }) {
                         onPrevious: () => handlePageChange(currentPage - 1),
                         onNext: () => { handlePageChange(currentPage + 1) },
                     }}
+                    selectable={false}
                 >
 
                     {rows}

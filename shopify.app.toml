@@ -3,7 +3,7 @@
 client_id = "faf0d7a36fc7910b0c24e38d5e234b6a"
 name = "SizeChartPro"
 handle = "sizechartpro-1"
-application_url = "https://barrel-difficulties-into-designer.trycloudflare.com"
+application_url = "https://marvel-cigarettes-pa-rational.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_files,read_locales,read_products,read_themes,write_files"
 
 [auth]
 redirect_urls = [
-  "https://barrel-difficulties-into-designer.trycloudflare.com/auth/callback",
-  "https://barrel-difficulties-into-designer.trycloudflare.com/auth/shopify/callback",
-  "https://barrel-difficulties-into-designer.trycloudflare.com/api/auth/callback"
+  "https://marvel-cigarettes-pa-rational.trycloudflare.com/auth/callback",
+  "https://marvel-cigarettes-pa-rational.trycloudflare.com/auth/shopify/callback",
+  "https://marvel-cigarettes-pa-rational.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

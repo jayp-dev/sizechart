@@ -1,0 +1,48 @@
+<!-- button.liquid -->
+<div class="size-chart-button">
+    <button id="openSizeChart" class="btn btn-primary">View Size Chart</button>
+</div>
+
+<!-- Popup Modal -->
+<div id="sizeChartModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2>Size Chart</h2>
+        <div id="sizeChartContent">Loading size chart...</div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const button = document.getElementById('openSizeChart');
+        const modal = document.getElementById('sizeChartModal');
+        const closeModal = document.getElementById('closeModal');
+        const sizeChartContent = document.getElementById('sizeChartContent');
+
+        // Shopify Liquid variable {{ product.id }} is output safely into JavaScript as a constant
+        const productId = '{{ product.id | json }}';
+
+        // Show modal when button is clicked
+        button.addEventListener('click', async function () {
+            modal.style.display = 'block';
+
+            // Fetch size chart data from your app's backend
+            try {
+                const response = await fetch(`/apps/sizechartpro/api/getSizeChart?productId=${productId}`);
+                const data = await response.json();
+                if (data.sizeChart) {
+                    sizeChartContent.innerHTML = data.sizeChart; // Inject the size chart data
+                } else {
+                    sizeChartContent.innerHTML = 'No size chart available for this product.';
+                }
+            } catch (error) {
+                sizeChartContent.innerHTML = 'Failed to load size chart data.';
+            }
+        });
+
+        // Close the modal
+        closeModal.addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+    });
+</script>

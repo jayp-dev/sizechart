@@ -23,6 +23,7 @@ export default function App() {
           Home
         </Link>
         <Link to="/app/templates?from=linked_products">Templates</Link>
+        <Link to="/app/dashboard">Size charts</Link>
         <Link to="/app/linkedproducts">Linked products</Link>
         <Link to="/app/settings">Settings</Link>
         {session.shop === 'gifting4.myshopify.com' && (
