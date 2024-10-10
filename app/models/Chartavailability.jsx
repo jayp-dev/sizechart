@@ -1,6 +1,6 @@
 
 import db from "../db.server";
-import { StoreSizeChartGet } from "./SizeChartGet";
+import { FecthchartDetails } from "./SizeChartGet";
 export async function Chartavailability(shop, productid, collectionids, application_url) {
     const collectionIdsArray = collectionids
         .split(',')
@@ -16,7 +16,7 @@ export async function Chartavailability(shop, productid, collectionids, applicat
     const findLinkedProducts = await db.linkedProduct.findMany({ where: { storeId: session[0].id, productId: `gid://shopify/Product/${productid}` } })
 
     if (findLinkedProducts.length > 0) {
-        const sizecharts = await StoreSizeChartGet({}, findLinkedProducts[0].storeSizeChartId, '')
+        const sizecharts = await FecthchartDetails(findLinkedProducts[0].storeSizeChartId)
         const { createdAt, updatedAt, ShopId, templateId, id, LinkedProduct, LinkedCollection, ...filteredSizeChart } = sizecharts.response[0];
 
         return {
@@ -33,7 +33,7 @@ export async function Chartavailability(shop, productid, collectionids, applicat
             SizechartPro: filteredSizeChart
 
         }
-        // return findLinkedProducts;
+        // return sizecharts;
     }
 
     //find Linked collection from the  Db
@@ -48,7 +48,7 @@ export async function Chartavailability(shop, productid, collectionids, applicat
 
     if (findLinkedCollections.length > 0) {
         // return findLinkedCollections
-        const sizecharts = await StoreSizeChartGet({}, findLinkedProducts[0].storeSizeChartId, '')
+        const sizecharts = await FecthchartDetails(findLinkedProducts[0].storeSizeChartId)
         const { createdAt, updatedAt, ShopId, templateId, id, LinkedProduct, LinkedCollection, ...filteredSizeChart } = sizecharts.response[0];
 
         return {

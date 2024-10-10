@@ -96,21 +96,10 @@ export async function UserSizeChartUpdate(formValues, tableData, session, chartI
     if (!updatechart.error) {
         const { id } = updatechart;
 
-        await db.linkedProduct.deleteMany({
-            where: {
-                storeSizeChartId: id,
-            },
-        });
-
-        await db.linkedCollection.deleteMany({
-            where: {
-                storeSizeChartId: id,
-            },
-        });
 
         const linkedProductsData = Array.isArray(LinkedProducts)
             ? LinkedProducts.map((product) => ({
-                productId: product.id,
+                productId: checkData(product.id) ? product.id : product.productId,
                 productTitle: product.title || product.productTitle,
                 storeId: session.id,
                 storeSizeChartId: id,
@@ -118,21 +107,48 @@ export async function UserSizeChartUpdate(formValues, tableData, session, chartI
             : [];
         const linkedCollectionsData = Array.isArray(Linkedcollection)
             ? Linkedcollection.map((collection) => ({
-                collectionId: collection.id,
+                collectionId: checkData(collection.id) ? collection.id : collection.collectionId,
                 collectionTitle: collection.title || collection.collectionTitle,
                 storeId: session.id,
                 storeSizeChartId: id,
             }))
             : [];
 
-        await db.linkedProduct.createMany({
-            data: linkedProductsData,
-        });
+        // Check if there are linked products to create
+        if (linkedProductsData.length > 0) {
+            await db.linkedProduct.deleteMany({
+                where: {
+                    storeSizeChartId: id,
+                },
+            });
+            await db.linkedProduct.createMany({
+                data: linkedProductsData,
+            });
+        }
 
-        await db.linkedCollection.createMany({
-            data: linkedCollectionsData,
-        });
+        // Check if there are linked collections to create
+        if (linkedCollectionsData.length > 0) {
+            await db.linkedCollection.deleteMany({
+                where: {
+                    storeSizeChartId: id,
+                },
+            });
+            await db.linkedCollection.createMany({
+                data: linkedCollectionsData,
+            });
+        }
+
+
     }
 
     return updatechart;
+}
+
+
+function checkData(data) {
+    if (data.includes('gid://shopify')) {
+        return true; // If it contains, return true
+    } else {
+        return false; // You can replace "newData" with any desired value or logic
+    }
 }

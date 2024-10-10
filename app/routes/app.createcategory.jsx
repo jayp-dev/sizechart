@@ -10,7 +10,7 @@ import invariant from 'tiny-invariant';
 export async function loader({ request }) {
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get("page")) || 1;
-    const pageSize = parseInt(url.searchParams.get("pageSize")) || 2;
+    const pageSize = parseInt(url.searchParams.get("pageSize")) || 5;
 
     try {
         const totalItems = await db.sizeCategory.count();

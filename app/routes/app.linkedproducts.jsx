@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node"; // or "@remix-run/cloudflare"
-import { Page } from "@shopify/polaris";
+import { Box, Page } from "@shopify/polaris";
 import { DataTableIcon } from "@shopify/polaris-icons";
 import {
     useLoaderData, useNavigate, isRouteErrorResponse,
@@ -58,7 +58,9 @@ function LinkedProducts() {
             secondaryActions={[{ content: "View size charts", icon: DataTableIcon, onAction: Viewsizecharts }]}
         >
             {!sizecharts.error ? (
-                <LinkedTable chartData={chartData} page={page} pageSize={pageSize} totalPages={totalPages} />
+                <Box paddingBlockEnd={400}>
+                    <LinkedTable chartData={chartData} page={page} pageSize={pageSize} totalPages={totalPages} />
+                </Box>
             ) : (
                 <ErrorMessage title="No Data" description={sizecharts.error} />
             )}

@@ -1,0 +1,236 @@
+.sizechartProModal-root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9;
+}
+
+.sizechartProDialog-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    position: absolute;
+    max-width: 800px;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.sizechartProDialog-container {
+    height: 500px;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+}
+
+.sizechartProCloseButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.sizechartProSvgIcon-root {
+    width: 24px;
+    display: block;
+    height: 24px;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+.sizechartPro_title {
+    text-align: center;
+    font-weight: 600;
+}
+
+.sizechartPro-product-title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    margin-top: 10px;
+}
+
+.sizechartProTabs-flexContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.sizechartProTabs-flexContainer button {
+    margin: 0 10px;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.sizechartProButtonBase-root.active {
+    color: black;
+    font-weight: bold;
+    border-radius: 0px;
+    text-decoration-line: underline;
+}
+
+.sizechartProTabs-flexContainer:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 48%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 100%;
+    background: #ccc;
+}
+
+.sizechartProButton-root {
+    border: 0;
+    padding: 8px 20px;
+    background: #000;
+    color: #fff;
+    font-size: 14px;
+    display: block;
+    margin: auto;
+    width: max-content;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.sizechartPro-layout {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.sizechartPro-sizetable-container {
+    width: 60%
+}
+
+.sizechartPro-layout .image-container {
+    width: 40%
+}
+
+.sizechartPro-sizetable-container th {
+    background: #000;
+    color: #fff;
+}
+
+.image-container img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.sizeTablehtmlContent-root {
+    padding-top: 40px;
+}
+
+
+
+.no-root-image .sizechartPro-sizetable-container {
+    width: 100%;
+}
+
+
+
+.sizechartProTableContainer {
+    max-width: 435px;
+    max-height: 300px;
+    overflow-x: auto;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.no-root-image .sizechartProTableContainer {
+    max-width: 100%;
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    color: '#fff';
+    border: 0;
+    font-weight: 400;
+    padding: 8px;
+    min-width: 105px;
+}
+
+td {
+    padding: 8px;
+    text-align: left;
+    min-width: 105px;
+}
+
+tr:nth-child(even) td {
+    background: '#000'
+}
+
+.border-lines table {
+    border: 0
+}
+
+.border-lines table tr {
+    border-top: 1px solid #bdbaba;
+}
+
+.border-lines table tr:last-child {
+    border-bottom: 1px solid #bdbaba;
+}
+
+.border-tunnel table tr:first-child {
+    border-top: 1px solid #bdbaba;
+}
+
+.border-tunnel table tr:last-child {
+    border-bottom: 1px solid #bdbaba;
+}
+
+.border-grid td {
+    border: 1px solid #bdbaba;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+@media(max-width: 767px) {
+    .sizechartProPaper-root.sizechartProTableContainer-root {
+        overflow-x: scroll;
+    }
+
+    table {
+        width: 600px;
+    }
+
+    .sizechartProDialog-container {
+        padding: 10px;
+        width: 90%;
+    }
+
+    .sizechartPro-sizetable-container {
+        width: 100%
+    }
+
+    .sizechartPro-layout {
+        flex-wrap: wrap
+    }
+
+    .sizechartProDialog-container {
+        top: 42%
+    }
+
+    .image-container {
+        width: 100%
+    }
+}

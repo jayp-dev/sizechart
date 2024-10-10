@@ -1,9 +1,9 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "faf0d7a36fc7910b0c24e38d5e234b6a"
-name = "SizeChartPro"
+name = "PTI Size Chart Pro"
 handle = "sizechartpro-1"
-application_url = "https://marvel-cigarettes-pa-rational.trycloudflare.com"
+application_url = "https://fate-seats-losing-mesh.trycloudflare.com"
 embedded = true
 
 [build]
@@ -13,13 +13,13 @@ include_config_on_deploy = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_files,read_locales,read_products,read_themes,write_files"
+scopes = "read_files,read_locales,read_products,read_themes,write_files,write_themes"
 
 [auth]
 redirect_urls = [
-  "https://marvel-cigarettes-pa-rational.trycloudflare.com/auth/callback",
-  "https://marvel-cigarettes-pa-rational.trycloudflare.com/auth/shopify/callback",
-  "https://marvel-cigarettes-pa-rational.trycloudflare.com/api/auth/callback"
+  "https://fate-seats-losing-mesh.trycloudflare.com/auth/callback",
+  "https://fate-seats-losing-mesh.trycloudflare.com/auth/shopify/callback",
+  "https://fate-seats-losing-mesh.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

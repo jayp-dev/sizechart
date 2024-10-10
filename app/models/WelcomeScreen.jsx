@@ -11,7 +11,6 @@ export async function GetWelscreenData() {
 export async function GetAppEnable(admin, session, extensionId) {
     let DataTheme = null;
     try {
-
         const themes = await admin.rest.resources.Theme.all({
             session: session,
         });
@@ -40,6 +39,78 @@ export async function GetAppEnable(admin, session, extensionId) {
     }
 
 }
+
+export async function AppEnableDisable(admin, session, data) {
+    // this code is not working 
+    const EnableDisable = data.EmbedApp === 'true' ? true : false;
+    let DataTheme = null;
+    try {
+        const themes = await admin.rest.resources.Theme.all({
+            session: session,
+        });
+        const currentTheme = themes.data.find(theme => theme.role === 'main');
+        if (!currentTheme) {
+            throw new Error("No main theme found");
+        }
+
+        DataTheme = await admin.rest.resources.Asset.all({
+            session: session,
+            theme_id: currentTheme.id,
+            asset: { "key": "config/settings_data.json" },
+        });
+
+        if (!DataTheme) {
+            throw new Error("Failed to fetch `settings_data.json`");
+        }
+        DataTheme = JSON.parse(DataTheme.data[0].value);
+
+        let blockFound = false;
+
+        for (const blockKey in DataTheme.current.blocks) {
+            const block = DataTheme.current.blocks[blockKey];
+
+            if (block.type.includes('pti-size-chart-pro/blocks/SizechartEmbed')) {
+                block.disabled = EnableDisable;
+                block.settings = {
+                    ...block.settings
+                };
+                blockFound = true;
+
+                break; // Exit the loop once the block is found and updated
+            }
+        }
+
+        if (!blockFound) {
+            throw new Error("No block found with type 'pti-size-chart-pro'");
+        }
+        const updatedSettingsData = DataTheme;
+        const asset = new admin.rest.resources.Asset({ session: session });
+        asset.theme_id = currentTheme.id
+        asset.key = 'config/settings_data.json';
+        asset.value = updatedSettingsData;
+        const response = await asset.save({
+            update: true,
+        });
+
+        if (response.errors) {
+            throw new Error(`Failed to update settings_data.json: ${JSON.stringify(response.errors)}`);
+        }
+
+        return { success: true, message: "Settings updated successfully.", response };
+    } catch (error) {
+        console.error("Error fetching asset:", error);
+        return {
+            success: false,
+            error: "Error during app enable/disable",
+            details: error.message || error, // Ensure error details are captured correctly
+            stack: error.stack // Optionally return the error stack trace for more debugging info
+        };
+
+    }
+}
+
+
+
 
 export async function Getstarted(session, isAppEnable) {
     const Existingsession = await db.session.findUnique({ where: { id: session.id } });

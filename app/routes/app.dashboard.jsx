@@ -11,10 +11,10 @@ import { authenticate } from "../shopify.server";
 import { DashboardSizeCharts } from "../models/SizeChartGet";
 import { ErrorMessage } from "../components/ErrorMessage";
 import { useCallback, useEffect, useState } from "react";
-import { LoadingState } from "../components/LoadingState";
 import DashboardTable from "../components/DashboardTable";
 import { Modal, TitleBar, useAppBridge } from '@shopify/app-bridge-react';
 import { deleteSizeCharts, updateSizeChartStatus } from "../models/deleteSizeCharts";
+import LoadingSvg from "../components/LoadingSvg";
 
 // Loader function
 export const loader = async ({ request, params }) => {
@@ -58,23 +58,27 @@ export const action = async ({ request }) => {
 
 function Dashboard() {
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
     const { sizecharts, page, pageSize } = useLoaderData();
     const totalPages = sizecharts.totalItems;
     const [chartData, setChartData] = useState(sizecharts.response || []);
     const [deletedids, setDeletedids] = useState([]);
     const [modalType, setModalType] = useState(""); // 'single' or 'bulk'
-    const [newStatus, setNewStatus] = useState('draft'); // Default status
+    const [newStatus, setNewStatus] = useState(''); // Default status
     const fetcher = useFetcher(); // Use fetcher for actions (like form submission)
     const [isActiveModelErr, setisActiveModalErr] = useState(false);
     const [activeMessage, setActiveMesage] = useState('');
     const [showToast, setShowToast] = useState(false);
 
     const createHandle = async () => {
-        navigate("/app/templates?from=linked_products");
+        setLoading(true);
+        navigate("/app/templates?from=linked_products", { replace: true });
     };
 
     const ViewProducts = async () => {
-        navigate("/app/linkedproducts?from=linked_products");
+        setLoading(true);
+        navigate("/app/linkedproducts?from=linked_products", { replace: true });
     };
 
     const shopify = useAppBridge();
@@ -124,8 +128,8 @@ function Dashboard() {
         }
     }, [showToast, shopify, fetcher]);
 
-    if (!sizecharts) {
-        return <LoadingState />;
+    if (loading) {
+        return <LoadingSvg />;
     }
     return (
         <Page
@@ -211,6 +215,7 @@ function Dashboard() {
                         setisActiveModalErr={setisActiveModalErr}
                         setActiveMesage={setActiveMesage}
                         ResetMethod={showToast}
+                        setLoading={setLoading}
                     />
                 ) : (
                     <ErrorMessage title="No Data" description={sizecharts.error} />

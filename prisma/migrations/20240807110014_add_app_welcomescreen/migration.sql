@@ -1,8 +1,0 @@
--- CreateTable
-CREATE TABLE "WelcomeScreen" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "EmbedApp" BOOLEAN NOT NULL DEFAULT false,
-    "GettingStart" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL
-);

@@ -7,15 +7,27 @@ import {
     useBreakpoints,
     Card,
     InlineStack,
-    Button,
+    Button
 } from '@shopify/polaris';
 
 import {
     EditIcon, DeleteIcon
 } from '@shopify/polaris-icons';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
-function DashboardTable({ chartData, page, pageSize, totalPages, ResetMethod, onDelete, setModalActive, setisActiveModalErr, setActiveMesage }) {
+function DashboardTable({ chartData, page, pageSize, totalPages, ResetMethod, onDelete, setModalActive, setisActiveModalErr, setActiveMesage, setLoading }) {
+    const [hoveredIndex, setHoveredIndex] = useState(null);
+
+    const hoverStyle = {
+        textDecoration: 'none',
+        cursor: 'pointer',
+    };
+
+    const hoverUnderline = {
+        textDecoration: 'underline',
+    };
+
+
     const navigate = useNavigate();
     const resourceName = {
         singular: 'Size chart',
@@ -31,12 +43,14 @@ function DashboardTable({ chartData, page, pageSize, totalPages, ResetMethod, on
     };
 
 
-    const HandleEdit = (chart_id) => {
+    const HandleEdit = async (chart_id) => {
         if (chart_id) {
-            navigate(`/app/createsizechart/edit_chart?chart_id=${chart_id}&from=user_chart`);
+            setLoading(true);
+            navigate(`/app/createsizechart/edit_chart?chart_id=${chart_id}&from=user_chart`
+            );
+            // setLoading(false);
         }
-    };
-
+    }
     const { selectedResources, allResourcesSelected, handleSelectionChange, clearSelection } =
         useIndexResourceState(chartData);
 
@@ -61,7 +75,14 @@ function DashboardTable({ chartData, page, pageSize, totalPages, ResetMethod, on
             >
                 <IndexTable.Cell>
                     <Text variant="headingXs" as="h6">
-                        {name}
+                        <span
+                            style={hoveredIndex === index ? hoverUnderline : hoverStyle}
+                            onMouseEnter={() => setHoveredIndex(index)}
+                            onMouseLeave={() => setHoveredIndex(null)}
+                            onClick={() => HandleEdit(id)}
+                        >
+                            {name}
+                        </span>
                     </Text>
 
                 </IndexTable.Cell>
@@ -177,12 +198,14 @@ function DashboardTable({ chartData, page, pageSize, totalPages, ResetMethod, on
                     { title: '', alignment: "end" },
 
                 ]}
-                pagination={{
-                    hasNext: page < totalPage,
-                    hasPrevious: page > 1,
-                    onPrevious: () => handleChangePage(page - 1),
-                    onNext: () => { handleChangePage(page + 1) },
-                }}
+                pagination={
+                    chartData.length > 15 && {
+                        hasNext: page < totalPage,
+                        hasPrevious: page > 1,
+                        onPrevious: () => handleChangePage(page - 1),
+                        onNext: () => { handleChangePage(page + 1) },
+                    }
+                }
             >
                 {rowMarkup}
             </IndexTable>

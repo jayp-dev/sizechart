@@ -27,13 +27,11 @@ export const loader = async ({ request }) => {
 
 export async function action({ request, params }) {
   /** @type {any} */
-
   const data = {
     ...Object.fromEntries(await request.formData())
   }
 
   try {
-
     if (data.action === 'update') {
       const updatescreen = await updatewelcomescreen(data);
       if (updatescreen != null) {
@@ -54,7 +52,6 @@ export default function Index() {
   const [showToast, setShowToast] = useState(false);
   const actionData = useActionData();
   const submit = useSubmit();
-
   useEffect(() => {
     if (actionData?.success) {
       setShowToast(true);
@@ -83,6 +80,7 @@ export default function Index() {
     submit(data, { method: "post" });
   };
 
+
   return (
     <div className="Polaris-Page">
       <BlockStack gap='400'>
@@ -110,7 +108,8 @@ export default function Index() {
                   accessibilityLabel="Enable"
                   variant="primary"
                 >
-                  Enable
+                  {isAppEnable ? 'Disable' : 'Enable'}
+
                 </Button>
               </InlineGrid>
               <Text as="p" variant="bodyMd">

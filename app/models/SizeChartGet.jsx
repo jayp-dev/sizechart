@@ -1,6 +1,6 @@
 
 import db from "../db.server";
-export async function PredefinedSizeChartGet(session, chartId, from) {
+export async function PredefinedSizeChartGet(session, admin, chartId, from) {
     try {
         const response = await db.predefinedSizeChart.findMany({ where: { id: chartId } });
         if (!response.error) {
@@ -52,7 +52,7 @@ export async function DashboardSizeCharts(session, page, pageSize) {
     }
 }
 
-export async function StoreSizeChartGet(session, chartId, from) {
+export async function StoreSizeChartGet(session, admin, chartId, from) {
     try {
         const response = await db.storeSizeChart.findMany({
             where: { id: chartId },
@@ -62,7 +62,46 @@ export async function StoreSizeChartGet(session, chartId, from) {
             },
         });
         if (!response.error) {
-            return { status: 200, success: true, response: response }
+            const originalData = response;
+            const newLinkedProduct = originalData[0]?.LinkedProduct || [];
+            const newLinkedCollection = originalData[0]?.LinkedCollection || [];
+
+            const enhancedData = await Promise.all(
+                newLinkedProduct.map(async (item) => {
+                    const productDetails = await fetchProductDetails(item.productId, admin);
+                    return {
+                        ...item,
+                        id: productDetails?.id,
+                        title: productDetails?.title,
+                        imageSrc: productDetails?.image,
+                        productImageAltText: productDetails?.imageAltText
+                    };
+                })
+            );
+
+            // Fetch collection details and update LinkedCollection
+            const enhancedCollections = await Promise.all(
+                newLinkedCollection.map(async (item) => {
+                    const collectionDetails = await fetchCollectionDetails(item.collectionId, admin);
+                    return {
+                        ...item,
+                        id: collectionDetails.id,
+                        title: collectionDetails.title,
+                        handle: collectionDetails.handle,
+                        updatedAt: collectionDetails.updatedAt,
+                        imageSrc: collectionDetails.image,
+                        alt: collectionDetails.imageAltText
+                    };
+                })
+            );
+
+            const updatedData = {
+                ...originalData[0],
+                LinkedProduct: enhancedData, // Update LinkedProduct with new data
+                LinkedCollection: enhancedCollections
+            };
+
+            return { status: 200, success: true, response: updatedData }
         }
         return { error: 'chart not found', status: 500, success: false }
     } catch (error) {
@@ -199,4 +238,22 @@ async function fetchCollectionDetails(collectionId, admin) {
         imageAltText: collection.image ? collection.image.altText : null,
     };
 
+}
+
+export async function FecthchartDetails(chartId) {
+    try {
+        const response = await db.storeSizeChart.findMany({
+            where: { id: chartId },
+            include: {
+                LinkedProduct: true, // Include the related products for each order
+                LinkedCollection: true,
+            },
+        });
+        if (!response.error) {
+            return { status: 200, success: true, response }
+        }
+        return { error: 'chart not found', status: 500, success: false }
+    } catch (error) {
+        return { error: error.message };
+    }
 }

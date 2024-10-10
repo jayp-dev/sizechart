@@ -8,9 +8,14 @@ generator client {
 // Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
 // enough when changing adapters.
 // See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+// datasource db {
+//   provider = "sqlite"
+//   url      = "file:dev.sqlite"
+// }
+
 datasource db {
-  provider = "sqlite"
-  url      = "file:dev.sqlite"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model Session {
@@ -85,7 +90,7 @@ model ShopSettings {
 
 model ShopImages {
   id        Int      @id @default(autoincrement())
-  images    String   @default("[]")
+  images    String   @db.Text
   shop      Session  @relation(fields: [ShopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   ShopId    String   @unique
   createdAt DateTime @default(now())
@@ -104,9 +109,9 @@ model PredefinedSizeChart {
   rounding_mode          String           @default("auto")
   rounding_numOfDecimals Int              @default(1)
   rounding_roundTo       Decimal          @default(0.1)
-  content                String           @default("")
+  content                String           @db.LongText
   image                  String           @default("")
-  user_chart_data        String           @default("[]") // Stores the size chart data as a JSON string
+  user_chart_data        String           @db.Text // Stores the size chart data as a JSON string
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
   StoreSizeChart         StoreSizeChart[]
@@ -125,9 +130,9 @@ model StoreSizeChart {
   rounding_mode          String              @default("auto")
   rounding_numOfDecimals Int                 @default(1)
   rounding_roundTo       Decimal             @default(0.1)
-  content                String              @default("")
+  content                String              @db.LongText
   image                  String              @default("")
-  user_chart_data        String              @default("[]") // Stores the size chart data as a JSON string
+  user_chart_data        String              @db.Text // Stores the size chart data as a JSON string
   LinkedProduct          LinkedProduct[]
   LinkedCollection       LinkedCollection[]
   createdAt              DateTime            @default(now())

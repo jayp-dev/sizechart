@@ -1,5 +1,5 @@
 import db from "../db.server"
-export async function PredefinedSize(formValues, tableData, session) {
+export async function PredefinedSize(formValues, tableData, session, iconName) {
     try {
         const { name, status, rounding_mode,
             allow_converter, allow_converter_in,
@@ -19,6 +19,7 @@ export async function PredefinedSize(formValues, tableData, session) {
                 rounding_numOfDecimals: Number(rounding_numOfDecimals),
                 rounding_roundTo: Number(rounding_roundTo),
                 content,
+                icon: iconName || '',
                 image: image ? image : '',
                 sizeCategoryId: id,
                 user_chart_data: tableRespone,
@@ -59,13 +60,19 @@ export async function PredefinedSize(formValues, tableData, session) {
                     storeSizeChartId: id,
                 }));
 
-                await db.linkedProduct.createMany({
-                    data: linkedProductsData,
-                });
+                // Check if there are linked products to create
+                if (linkedProductsData.length > 0) {
+                    await db.linkedProduct.createMany({
+                        data: linkedProductsData,
+                    });
+                }
 
-                await db.linkedCollection.createMany({
-                    data: linkedCollectionsData,
-                });
+                // Check if there are linked collections to create
+                if (linkedCollectionsData.length > 0) {
+                    await db.linkedCollection.createMany({
+                        data: linkedCollectionsData,
+                    });
+                }
 
             }
 

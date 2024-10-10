@@ -20,6 +20,10 @@ import { AdminSizeUpdate } from "../models/AdminSizeUpdate";
 import { UserSizeChartCreate, UserSizeChartUpdate } from "../models/UserSizeChart";
 import { fetchOtherSizeChartCollections, fetchOtherSizeChartProducts } from "../models/FetchSelected";
 import InlineDropZone from "../components/InlineDropZone";
+import { saveFileLocally } from "../models/saveFileLocally";
+import PreviewChart from "../components/SizeChart/PreviewChart";
+import { getShopFromRequestSettings } from "../models/ShopSettings";
+
 
 export const loader = async ({ request, params }) => {
     const { admin, session } = await authenticate.admin(request);
@@ -34,26 +38,27 @@ export const loader = async ({ request, params }) => {
     const chartImages = await ShopImagesGet(session, admin);
     const SelectedProducts = await fetchOtherSizeChartProducts(session);
     const SelectedCollections = await fetchOtherSizeChartCollections(session);
+    const shopSettings = await getShopFromRequestSettings(session);
     if (params.id === 'admin') {
-        return json({ addAppBlockId, isAppEnable, shop, isAdmin: true, SizeCategory, application_url, chartImages, SelectedProducts, SelectedCollections });
+        return json({ addAppBlockId, isAppEnable, shop, isAdmin: true, SizeCategory, application_url, chartImages, SelectedProducts, SelectedCollections, shopSettings });
     }
 
     if (params.id === 'edit_chart') {
         const chartId = url.searchParams.get("chart_id");
         const from = url.searchParams.get("from");
         if (from === 'user_chart') {
-            const sizechart = await StoreSizeChartGet(session, chartId, from);
+            const sizechart = await StoreSizeChartGet(session, admin, chartId, from);
             if (sizechart.status == 200) {
-                return json({ addAppBlockId, isAppEnable, shop, isAdmin: false, SizeCategory, application_url, chartImages, sizechart: sizechart.response[0], from, SelectedProducts, SelectedCollections });
+                return json({ addAppBlockId, isAppEnable, shop, isAdmin: false, SizeCategory, application_url, chartImages, sizechart: sizechart.response, from, SelectedProducts, SelectedCollections, shopSettings });
             }
         }
-        const sizechart = await PredefinedSizeChartGet(session, chartId, from);
+        const sizechart = await PredefinedSizeChartGet(session, admin, chartId, from);
         if (sizechart.status == 200) {
-            return json({ addAppBlockId, isAppEnable, shop, isAdmin: false, SizeCategory, application_url, chartImages, sizechart: sizechart.response[0], from, SelectedProducts, SelectedCollections });
+            return json({ addAppBlockId, isAppEnable, shop, isAdmin: false, SizeCategory, application_url, chartImages, sizechart: sizechart.response[0], from, SelectedProducts, SelectedCollections, shopSettings });
         }
     }
 
-    return json({ addAppBlockId, isAppEnable, shop, SizeCategory, chartImages, SelectedProducts, SelectedCollections });
+    return json({ addAppBlockId, isAppEnable, shop, SizeCategory, chartImages, SelectedProducts, SelectedCollections, shopSettings });
 
 }
 export const action = async ({ request, params }) => {
@@ -69,7 +74,13 @@ export const action = async ({ request, params }) => {
         const chartId = url.searchParams.get("chart_id");
         const from = url.searchParams.get("from");
         if (params.id === 'admin') {
-            const Response = await PredefinedSize(formValues, tableData, session);
+            const fileData = JSON.parse(data.formValues).template_icon;
+            let iconName = '';
+            if (fileData) {
+                const { fileName, fileBase64 } = fileData;
+                iconName = await saveFileLocally(fileBase64, fileName);
+            }
+            const Response = await PredefinedSize(formValues, tableData, session, iconName);
             if (!Response.error) {
                 return json({ success: true, message: 'Chart updated successfully', Response })
             }
@@ -78,6 +89,13 @@ export const action = async ({ request, params }) => {
             const response = await AdminSizeUpdate(formValues, tableData, session, chartId)
             return json({ success: true, message: 'Admin Size Update successfully', response })
         } else if (from === 'linked_products') {
+            // return json({ formValues, tableData, session, chartId })
+            if (formValues.id) {
+                const saved = await UserSizeChartUpdate(formValues, tableData, session, formValues.id);
+                if (!saved.error) {
+                    return json({ success: true, response: saved, message: 'Data saved successfully' })
+                }
+            }
             const userzise = await UserSizeChartCreate(formValues, tableData, session, chartId)
             if (!userzise.error) {
                 return json({ success: true, response: userzise, message: 'Size chart create successfully' })
@@ -85,12 +103,14 @@ export const action = async ({ request, params }) => {
 
             return json({ response: userzise })
         } else if (from === 'user_chart') {
+            // return json({ formValues, tableData, session, chartId })
             const update_userchart = await UserSizeChartUpdate(formValues, tableData, session, chartId);
             if (!update_userchart.error) {
                 return json({ success: true, response: update_userchart, message: 'Size chart update successfully' })
             }
             return json({ response: update_userchart })
         }
+
     } catch (error) {
         console.error("Error performing action:", error);
         return json({ error: error.message }, { status: 500 });
@@ -98,16 +118,19 @@ export const action = async ({ request, params }) => {
 }
 function Createsizechart() {
     const actionData = useActionData();
+    const [isSaved, setSaved] = useState('');
+    const [PreviewEnable, setPreviewEnable] = useState(false);
     useEffect(() => {
         if (actionData) {
+            setSaved(actionData?.response?.id)
             console.log("Action Data:", actionData);
+            console.log('action id', actionData?.response?.id)
         }
     }, [actionData]);
 
-    const { addAppBlockId, isAppEnable, shop, isAdmin, SizeCategory, application_url, chartImages, sizechart, from, SelectedProducts, SelectedCollections } = useLoaderData();
-
+    const { addAppBlockId, isAppEnable, shop, isAdmin, SizeCategory, application_url, chartImages, sizechart, from, SelectedProducts, SelectedCollections, shopSettings } = useLoaderData();
     const [columns, setColumns] = useState(['']);
-    const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+    // console.log(shop);
     const [file, setFile] = useState(null);
     const [icon, setIcon] = useState(null);
     const {
@@ -125,6 +148,7 @@ function Createsizechart() {
         user_chart_data = '',
         LinkedCollection = [],
         LinkedProduct = [],
+        template_icon = '',
     } = sizechart || {};
 
     useEffect(() => {
@@ -152,13 +176,14 @@ function Createsizechart() {
             : defaultCategory;
 
         return {
+            id: isSaved || '',
             category: {
                 id: sizeCategoryId ? selectedCategory.id : defaultCategory.id,
                 value: sizeCategoryId ? selectedCategory.value : defaultCategory.value
             },
             allow_converter: `${allow_converter}` || 'true',
             name: name || '',
-            status: status || '',
+            status: status || 'draft',
             allow_converter_in: allow_converter_in || 1,
             rounding_mode: rounding_mode || "auto",
             rounding_numOfDecimals: rounding_numOfDecimals || 1,
@@ -166,10 +191,21 @@ function Createsizechart() {
             content: content,
             LinkedProducts: LinkedProduct,
             Linkedcollection: LinkedCollection,
-            image: image || selectImage
+            image: image || selectImage,
+            template_icon: template_icon || ''
         };
     });
 
+
+    // Update the `id` field in `formValues` when `isSaved` changes
+    useEffect(() => {
+        if (isSaved) {
+            setFormValues(prevValues => ({
+                ...prevValues,
+                id: isSaved
+            }));
+        }
+    }, [isSaved]);
 
     useEffect(() => {
         setFormValues((prevValues) => ({
@@ -179,7 +215,6 @@ function Createsizechart() {
     }, [selectImage]);
 
     const [initialValues, setInitialValues] = useState(formValues);
-    const [toastMessage, setToastMessage] = useState('');
     const [linkedProducts, setLinkedProducts] = useState(LinkedProduct);
     const [linkedCollections, setLinkedCollections] = useState(LinkedCollection);
     const [loading, setLoading] = useState(false);
@@ -285,43 +320,6 @@ function Createsizechart() {
         [linkedCollections, linkedProducts]
     );
 
-    // const handleProductSelection = useCallback(async () => {
-    //     setLoading(true);
-    //     try {
-    //         const selected = await shopify.resourcePicker({
-    //             type: 'product',
-    //             multiple: true,
-    //             filter: {
-    //                 hidden: true,
-    //                 variants: false,
-    //                 draft: false,
-    //                 archived: false,
-    //             },
-    //         });
-
-    //         if (selected) {
-    //             setLoading(false);
-    //             setLinkedProducts(selected || []);
-
-    //             handleChange('LinkedProducts', [
-    //                 ...selected.map(product => ({
-    //                     id: product.id,
-    //                     title: product.title,
-    //                     type: 'Product',
-    //                     imageSrc: product.images[0]?.originalSrc || '',
-    //                 }))
-    //             ])
-    //         } else {
-    //             console.log('Product picker was cancelled by the user');
-    //         }
-    //     } catch (error) {
-    //         console.error('Error during product selection:', error);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // }, [handleChange]);
-
-
     const handleProductSelection = useCallback(async () => {
         setLoading(true);
         try {
@@ -337,6 +335,7 @@ function Createsizechart() {
             });
 
             if (selected) {
+
                 const otherSizeChartProducts = SelectedProducts;
                 const otherSizeChartProductIds = otherSizeChartProducts.map(product => product.productId);
                 const alreadyLinkedProducts = selected.filter(product =>
@@ -353,6 +352,7 @@ function Createsizechart() {
                 }
 
                 if (newProducts.length > 0) {
+                    // console.log(newProducts);
                     setLinkedProducts(prevLinkedProducts => [
                         ...newProducts.map(product => ({
                             id: product.id,
@@ -372,9 +372,9 @@ function Createsizechart() {
                     ]);
 
                     if (alreadyLinkedProducts.length === 0) {
-
-                        setToastMessage('Products added successfully!');
-                        setShowToast(true);
+                        shopify.toast.show(`Products added successfully!. Please save Linked Products click on save button`, {
+                            onDismiss: () => { shopify.toast.hide() }
+                        });
                     }
                 } else if (newProducts.length === 0) {
                     shopify.toast.show(`No new products were selected or all selected products are already linked.`, {
@@ -382,13 +382,13 @@ function Createsizechart() {
                     });
                 }
             } else {
-                setToastMessage('Product picker was cancelled by the user.');
                 setShowToast(true);
             }
         } catch (error) {
-            console.error('Error during product selection:', error);
-            setToastMessage('An error occurred while selecting products.');
-            setShowToast(true);
+            shopify.toast.show(`An error occurred while selecting products.`, {
+                onDismiss: () => { shopify.toast.hide() }
+            });
+
         } finally {
             setLoading(false);
         }
@@ -403,6 +403,7 @@ function Createsizechart() {
             });
 
             if (selected) {
+                // console.log(selected)
                 const otherSizeChartCollection = SelectedCollections;
                 const otherSizeCharCollectionIds = otherSizeChartCollection.map(collection => collection.collectionId);
                 const alreadyLinkedCollections = selected.filter(collection =>
@@ -424,7 +425,7 @@ function Createsizechart() {
                             id: collection.id,
                             title: collection.title,
                             type: 'Collection',
-                            imageSrc: '',
+                            imageSrc: collection?.image?.originalSrc || '',
                         }))
                     ]);
 
@@ -438,9 +439,9 @@ function Createsizechart() {
                     ]);
 
                     if (alreadyLinkedCollections.length === 0) {
-
-                        setToastMessage('Products added successfully!');
-                        setShowToast(true);
+                        shopify.toast.show(` Collection Added successfully please save.`, {
+                            onDismiss: () => { shopify.toast.hide() }
+                        });
                     }
                 } else if (newCollections.length === 0) {
                     shopify.toast.show(`No new collection were selected or all selected collection are already linked.`, {
@@ -448,42 +449,17 @@ function Createsizechart() {
                     });
                 }
             } else {
-                setToastMessage('collection picker was cancelled by the user.');
                 setShowToast(true);
             }
         } catch (error) {
-            console.error('Error during collection selection:', error);
-            setToastMessage('An error occurred while selecting products.');
+            shopify.toast.show(`An error occurred while selecting products.`, {
+                onDismiss: () => { shopify.toast.hide() }
+            });
             setShowToast(true);
         } finally {
             setLoading(false);
         }
     }, [handleChange, SelectedCollections]);
-
-    // const handleCollectionSelection = useCallback(async () => {
-    //     try {
-    //         const selected = await shopify.resourcePicker({
-    //             type: 'collection',
-    //             multiple: true,
-    //         });
-
-    //         if (selected) {
-    //             const ExtractCollection = [...selected.map(collection => ({
-    //                 id: collection.id,
-    //                 title: collection.title,
-    //                 type: 'Collection',
-    //                 imageSrc: '',
-    //             }))];
-    //             setLinkedCollections(selected || []);
-    //             handleChange('Linkedcollection', ExtractCollection)
-    //         } else {
-    //             console.log('Collection picker was cancelled by the user');
-    //         }
-    //     } catch (error) {
-    //         console.error('Error during collection selection:', error);
-    //     }
-    // }, [handleChange]);
-
     const handleChangeselect = (field) => (selectedValue) => {
         const selectedCategory = Categories.find(category => category.value === selectedValue);
         setFormValues(prevValues => ({
@@ -495,21 +471,32 @@ function Createsizechart() {
         }));
     };
 
-    // Use useEffect to monitor formValues changes
-    useEffect(() => {
-        const hasChanges = () => JSON.stringify(formValues) !== JSON.stringify(initialValues);
-        setIsButtonEnabled(hasChanges());
-    }, [formValues, initialValues]);
-
-
     const handleFileChange = (newFile) => {
         setFile(newFile);
     };
+    const HandleiconChange = async (newFile) => {
+        try {
+            setIcon(newFile);
+            const base64File = await fileToBase64(newFile);
+            const fileData = {
+                fileName: newFile.name,
+                fileBase64: base64File
+            };
+            handleChange('template_icon', fileData);  // Store the Base64 string in formValues
+        } catch (error) {
+            console.error('Error converting file to Base64:', error);
+        }
+    };
 
-    const HandleiconChange = (newFile) => {
-        console.log(newFile)
-        setIcon(newFile);
-    }
+
+    const fileToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);  // Read the file as a Data URL (Base64 encoded)
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+        });
+    };
 
     const handleClear = () => {
         setFile(null);
@@ -565,7 +552,8 @@ function Createsizechart() {
             formValues: JSON.stringify(formValues),
             tableData: JSON.stringify(tableData)
         }
-        submit(data, { method: 'POST' })
+        // console.log(formValues);
+        submit(data, { method: 'POST', encType: "multipart/form-data" })
 
     }
 
@@ -586,9 +574,13 @@ function Createsizechart() {
     }, [showToast, actionData?.message]);
     return (
         <Page
-            backAction={{ content: 'Orders', url: '#' }}
+            backAction={{
+                content: 'Orders', onAction: async () => {
+                    navigate(-1);
+                }
+            }}
             title={isAdmin ? '' : name}
-            primaryAction={{ content: 'Save', disabled: !isButtonEnabled, onAction: handleSubmit }}
+            primaryAction={{ content: 'Save', onAction: handleSubmit }}
             secondaryActions={[
                 {
                     content: 'View your store', icon: PersonalizedTextIcon,
@@ -597,7 +589,10 @@ function Createsizechart() {
                     }
                 },
                 {
-                    content: 'Preview size chart', icon: ViewIcon
+                    content: 'Preview size chart', icon: ViewIcon, onAction: () => {
+                        // alert('working')
+                        setPreviewEnable((pre) => !pre)
+                    }
                 },
                 {
                     content: 'View size charts', icon: DataTableIcon, onAction: async () => {
@@ -613,7 +608,7 @@ function Createsizechart() {
                 <Layout.Section variant="oneHalf">
                     <Card roundedAbove="sm">
                         <div style={{
-                            height: '204px',
+                            height: `${isAdmin ? '300px' : '220px'}`,
                         }}>
                             <Text as="h2" variant="headingSm">
                                 Name
@@ -631,10 +626,11 @@ function Createsizechart() {
                                     }
                                 />
                             </Box>
-
-                            <InlineDropZone OniconChange={HandleiconChange} icon={icon} />
-                            {from === 'admin' && (
-                                <Box paddingBlockStart="200">
+                            {isAdmin && (
+                                <InlineDropZone OniconChange={HandleiconChange} icon={icon} />
+                            )}
+                            {from === 'admin' || isAdmin && (
+                                <Box paddingBlockStart="500">
                                     <Text as="h2" variant="headingSm">
                                         Select Category
                                     </Text>
@@ -724,10 +720,14 @@ function Createsizechart() {
                                     <InlineStack align="space-between" direction={"row"} gap={"400"}>
                                         <InlineStack align="space-between" blockAlign="start" direction={"row"} gap={"400"}>
                                             {linkedProducts.length > 0 && (
-                                                <Badge tone="attention">{linkedProducts.length} Linked products</Badge>
+                                                <div onClick={showLinkedItems} style={{ cursor: 'pointer' }}>
+                                                    <Badge tone="attention" >{linkedProducts.length} Linked products</Badge>
+                                                </div>
                                             )}
                                             {linkedCollections.length > 0 && (
-                                                <Badge tone="attention">{linkedCollections.length} Linked collections</Badge>
+                                                <div onClick={showLinkedItems} style={{ cursor: 'pointer' }}>
+                                                    <Badge tone="attention" onClick={showLinkedItems}>{linkedCollections.length} Linked collections</Badge>
+                                                </div>
                                             )}
                                         </InlineStack>
                                     </InlineStack>
@@ -861,7 +861,7 @@ function Createsizechart() {
                                                         label="Number of decimals"
                                                         options={[
                                                             { label: '1 decimal (0.0)', value: '1' },
-                                                            { label: '2 decimal (0.0)', value: '2' },
+                                                            { label: '2 decimal (0.00)', value: '2' },
                                                         ]}
                                                         onChange={(value) => handleChange('rounding_numOfDecimals', value)}
                                                         value={formValues.rounding_numOfDecimals}
@@ -927,9 +927,16 @@ function Createsizechart() {
                         </BlockStack>
                     </Card>
                 </Layout.Section>
+
+                {PreviewEnable && (
+                    <Layout.Section variant="fullWidth">
+                        <PreviewChart PreviewEnable={PreviewEnable} setPreviewEnable={setPreviewEnable} chartValue={formValues} tableData={tableData} shopSettings={shopSettings} />
+                    </Layout.Section>
+                )}
             </Layout>
+
             <PageActions
-                primaryAction={{ content: 'Save', disabled: !isButtonEnabled, onAction: handleSubmit }}
+                primaryAction={{ content: 'Save', onAction: handleSubmit }}
             />
         </Page >
     )

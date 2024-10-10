@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 
 function ShowLinkedItems({ linkedProducts, linkedCollections }) {
     // Combine products and collections
+    console.log(linkedCollections, linkedProducts)
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 5; // Number of items per page
     const combinedData = [
@@ -10,13 +11,13 @@ function ShowLinkedItems({ linkedProducts, linkedCollections }) {
             id: product.id,
             title: product.title || product.productTitle,
             type: 'Product',
-            imageSrc: product?.images?.[0]?.originalSrc || '',
+            imageSrc: product?.images?.[0]?.originalSrc || product?.imageSrc || '',
         })),
         ...linkedCollections.map(collection => ({
             id: collection.id,
             title: collection.title,
             type: 'Collection',
-            imageSrc: '', // Collections don't have images in this data
+            imageSrc: collection?.imageSrc || '', // Collections don't have images in this data
         })),
     ];
 
@@ -62,13 +63,16 @@ function ShowLinkedItems({ linkedProducts, linkedCollections }) {
                         { title: 'Name' },
                         { title: 'Type' },
                     ]}
-                    pagination={{
-                        label: `${currentPage} of ${totalPages}`,
-                        hasNext: currentPage * pageSize < combinedData.length,
-                        hasPrevious: currentPage > 1,
-                        onPrevious: () => handlePageChange(currentPage - 1),
-                        onNext: () => { handlePageChange(currentPage + 1) },
-                    }}
+
+                    pagination={
+                        combinedData.length > pageSize && {
+                            label: `${currentPage} of ${totalPages}`,
+                            hasNext: currentPage < totalPages,
+                            hasPrevious: currentPage > 1,
+                            onPrevious: () => handlePageChange(currentPage - 1),
+                            onNext: () => handlePageChange(currentPage + 1),
+                        }
+                    }
                     selectable={false}
                 >
 

@@ -100,7 +100,7 @@ function LinkedTable({ chartData, page, totalPages, pageSize }) {
 
                 ]}
                 selectable={false}
-                pagination={{
+                pagination={chartData.length > 15 && {
                     hasNext: page < totalPages,
                     hasPrevious: page > 1,
                     onPrevious: () => handleChangePage(page - 1),
