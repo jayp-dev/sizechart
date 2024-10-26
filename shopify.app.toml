@@ -3,7 +3,7 @@
 client_id = "faf0d7a36fc7910b0c24e38d5e234b6a"
 name = "PTI Size Chart Pro"
 handle = "sizechartpro-1"
-application_url = "https://opportunities-photograph-commissioners-interference.trycloudflare.com"
+application_url = "https://engaged-files-obvious-influenced.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_files,read_locales,read_products,read_themes,write_files,write_th
 
 [auth]
 redirect_urls = [
-  "https://opportunities-photograph-commissioners-interference.trycloudflare.com/auth/callback",
-  "https://opportunities-photograph-commissioners-interference.trycloudflare.com/auth/shopify/callback",
-  "https://opportunities-photograph-commissioners-interference.trycloudflare.com/api/auth/callback"
+  "https://engaged-files-obvious-influenced.trycloudflare.com/auth/callback",
+  "https://engaged-files-obvious-influenced.trycloudflare.com/auth/shopify/callback",
+  "https://engaged-files-obvious-influenced.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
